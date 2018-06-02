@@ -31,13 +31,12 @@ const cd xi(0., 1.);
 cd rtraj(double a0, double ap, double s);
 cd ctraj(double a0, double ap, double s);
 cd n_amp(int n, double alph[], double coupling[], double s, double t);
-
-//iso-amp.cpp
 cd isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double t, double u);
 
 //partial-waves.cpp
 double u_man(double s, double z);
 double t_man(double s, double z);
+double kallen(double s, double t, double u);
 double legendre(int l, double x);
 cd partial_wave(int l, int iso, double coup[][maxN+1], double alph[], double s);
 double cross_section(int iso, double coup[][maxN+1], double alph[], double s, double z);

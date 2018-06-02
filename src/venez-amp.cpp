@@ -1,16 +1,25 @@
-//
 // Contains functions related to the a general amplitude in Veneziano form.
+//
+// Dependencies: cgamma.cpp
+//
+// Author:       Daniel Winney (2018)
+// Affiliation:  Joint Physics Analysis Center (JPAC)
+// Email:        dwinney@giu.edu
 // ---------------------------------------------------------------------------
 
+//TODO: Uncouple from big header.
 #include "veneziano.h"
 
-//Real Regge Trajectory
+//Real Linear Regge Trajectory
+// a0 - intercept (~ .5 for rho)
+// ap - slope parameter (~ .09 for rho)
 cd rtraj(double a0, double ap, double s)
 {
         cd result = a0 + ap*s;
         return result;
 }
 
+//TODO: Remove the global variables for gamma_res and m_res
 //Complex Regge Trajectory (w/ Phase Space factor)
 cd ctraj(double a0, double ap, double s)
 {
@@ -19,7 +28,10 @@ cd ctraj(double a0, double ap, double s)
         return result;
 }
 
-//Veneziano-type function of two variables, s and t.
+//Veneziano-type function of two invariant variables, s and t.
+// n - number of poles
+// alph[] - array with alpha_0 and alpha^prime
+// coupling[] - array of size n + 1 with couplings a_n,i for fixed n
 cd n_amp(int n, double alph[], double coupling[], double s, double t)
 {
         cd s_alpha = rtraj(alph[0], alph[1], s);
@@ -46,6 +58,7 @@ cd n_amp(int n, double alph[], double coupling[], double s, double t)
                 sum += coupling[i]*pow(-(s_alpha + t_alpha), ii);
 
         }
+
         cd result = coeff*background*sum;
         return result;
 }

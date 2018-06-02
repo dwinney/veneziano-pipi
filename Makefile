@@ -10,7 +10,7 @@ vpath %.cpp src
 vpath %.h src
 vpath %.o src/obj
 
-objects 	= $(addprefix $(OBJ_DIR)/, venez-amp.o pipi-iso.o cgamma.o gauleg.o main.o partial-waves.o)
+objects 	= $(addprefix $(OBJ_DIR)/, pipi-amp.o venez-amp.o cgamma.o gauleg.o main.o partial-waves.o)
 
 $(objects) : $(OBJ_DIR)/%.o :  %.cpp veneziano.h
 						g++ -c $< -o $@

@@ -1,10 +1,14 @@
-//
 // Kinematic functions for extracting s-channel partial waves from an amplitude.
-//-----------------------------------------------------------------------------
+//
+// Author:       Daniel Winney (2018)
+// Affiliation:  Joint Physics Analysis Center (JPAC)
+// Email:        dwinney@giu.edu
+// ---------------------------------------------------------------------------
 
+//TODO: Uncouple from big header.
 #include "veneziano.h"
 
-//Mandelstam variables t and u as functions of s and s-channel scattering angle z.
+// Mandelstam variables t and u as functions of s and s-channel scattering angle z
 double t_man(double s, double z)
 {
         double psqr = (s - 4.*pow(xmpi,2.))/4.;
@@ -19,7 +23,14 @@ double u_man(double s, double z)
         return result;
 }
 
-//Legendre Polynomials (up to l = 5)
+// Kallen triangle function
+double kallen(double s, double t, double u)
+{
+        double result = pow(s,2.) + pow(t, 2.) + pow(u, 2.) + 2.*s*t + 2.*t*s + 2.*t*u;
+        return result;
+}
+
+// Legendre Polynomials P_l(x) (up to l = 5)
 double legendre(int l, double x)
 {
         double PL;
@@ -37,6 +48,12 @@ double legendre(int l, double x)
         return PL;
 }
 
+//TODO: remove dependency on function???? (i.e. isospin_amp)
+// Outputs the complex partial-wave amplitude for pi-pi scattering at fixed s.
+// l - partial wave
+// iso - isospin projection ( iso = 1, 2, 3)
+// coup - a_n,i matrix of couplings
+// alph - regge trajectory parameters
 cd partial_wave(int l, int iso, double coup[][maxN+1], double alph[], double s)
 {
         double Pl, z, t, u;

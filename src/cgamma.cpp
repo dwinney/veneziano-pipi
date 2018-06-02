@@ -11,7 +11,7 @@
 //
 #include <complex.h>
 #include <complex>
-#include "veneziano.h"
+
 using namespace std;
 
 complex<double> cgamma(complex<double> z)

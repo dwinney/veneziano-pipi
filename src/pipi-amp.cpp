@@ -1,12 +1,22 @@
+// Contains functions related specifically to pi-pi scattering.
 //
-// Definitions of Definite Isospin amplitudes for pipi scattering
-// using Veneziano model.
+// Dependencies: venez-amp.cpp, cgamma.cpp
+//
+// Author:       Daniel Winney (2018)
+// Affiliation:  Joint Physics Analysis Center (JPAC)
+// Email:        dwinney@giu.edu
 // ---------------------------------------------------------------------------
 
-#include "veneziano.h"
+//TODO: Uncouple from big header.
+#include  "veneziano.h"
 
-//TODO Check indexing on couplings to make sure they line up
+//TODO: Figure out how to get rid of global variables.
 
+//Isospin projected Veneziano amplitudes for pi-pi scattering.
+// iso - isospin (0, 1, or 2)
+// coup - couplings matrix a_n,i
+// alph - Regge trajectory parameters
+// s, t, u - Mandelstam Variables
 cd isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double t, double u)
 {
         double couplings[6];
@@ -25,7 +35,10 @@ cd isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double t
                         break;
                 case 2: amp += -2.*n_amp(n, alph, n_coup, t, u);
                         break;
+                default: cout << "Entered isospin not allowed (only 0, 1, or 2)." << endl;
+                        exit(1);
                 }
         }
+
         return amp;
 }
