@@ -18,15 +18,17 @@ const double gamma_res = .145; //Width of resonance, this case the rho
 const double m_res = .77545; //Mass of resonance (rho)
 
 //Masses
-const double mRho = .77545;
 const double mPi = 0.1396;
 const double mK = 0.496;
 const double mEta = 0.54753;
 
+const double mRho = .77545;
+const double mF2 = 1.2754;
+
 //Thresholds for pi, eta, and K
-const double sthPi = 4.*pow(mPi, 2.);
-const double sthK = 4.*pow(mK, 2.);
-const double sthEta = 4.*pow(mEta, 2.);
+const double sthPi = 4.*mPi*mPi;
+const double sthK = 4.*mK*mK;
+const double sthEta = 4.*mEta*mEta;
 
 //Unit imaginary and real
 const cd xr(1., 0.);

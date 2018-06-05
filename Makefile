@@ -31,10 +31,10 @@ phase-shift		 :	$(directories)	$(objects) $(OBJ_DIR)/phase-shift.o
 				g++ -o phase-shift $(objects) $(OBJ_DIR)/phase-shift.o
 
 
-.PHONY		 : clean clean-out spotless
+.PHONY		 : clean clean-out spotless clean-exe
 
 spotless	 :
-						rm -rf ./output ./src/obj rho
+						rm -rf ./output ./src/obj rho phase-shift
 
 clean 		 :
 						clean-exe clean-out
