@@ -31,7 +31,12 @@ const cd xi(0., 1.);
 cd rtraj(double a0, double ap, double s);
 cd ctraj(double a0, double ap, double s);
 cd n_amp(int n, double alph[], double coupling[], double s, double t);
+
+//pipi-amp.cpp
 cd isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double t, double u);
+double phase_shift(int l, int iso, double s);
+double conformal(double s, double s0);
+double elastic_mom( double s, double sth);
 
 //partial-waves.cpp
 double u_man(double s, double z);

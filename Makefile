@@ -11,22 +11,27 @@ vpath %.h src
 vpath %.o src/obj
 
 objects 	= $(addprefix $(OBJ_DIR)/, pipi-amp.o venez-amp.o cgamma.o gauleg.o main.o partial-waves.o)
+directories	 = ./src/obj ./output
 
-$(objects) : $(OBJ_DIR)/%.o :  %.cpp veneziano.h
+$(objects) : 	$(OBJ_DIR)/%.o :  %.cpp veneziano.h
 						g++ -c $< -o $@
 
-rho : $(objects)
-			g++ -o rho $(objects)
+$(directories) :
+									@echo "Creating folder: $@" && \
+    							mkdir -p $@
 
-.PHONY : clean directories clean-out
+rho : 	$(directories)	$(objects)
+				g++ -o rho $(objects)
 
-directories :
-						mkdir -p ./src/obj ./output/plots
+.PHONY : clean clean-out
 
-clean 			: clean-exe clean-out
+spotless :
+				rm -rf ./output ./src/obj rho
+
+clean 			:	clean-exe clean-out
 
 clean-exe			:
-						rm -f rho $(OBJ_DIR)/*.o
+						rm -rf rho ./src/obj
 
 clean-out 	:
-						rm -f ./output/*.dat ./output/plots/*.pdf
+						rm -rf ./output

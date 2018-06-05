@@ -34,7 +34,7 @@ int main()
         double alph[2] = {.5, .9};
 
         double s, t, u;
-        cd squared, amp;
+        cd amp;
 
         ofstream pwave;
         pwave.open("./output/rho.dat");
@@ -45,19 +45,20 @@ int main()
                 // t = t_man(s, 1.);
                 // u = u_man(s, 1.);
                 // amp = isospin_amp(1, a, alph, s, t, u);
-                amp = partial_wave(1, 1, a, alph, s);
+                amp = phase_shift(0, 2, s);
                 // amp = ampl*conj(ampl);
-                pwave << left << setw(30) << s << setw(30) << -real(amp) << setw(30) << -imag(amp) << endl;
+                pwave << left << setw(30) << s << setw(30) << real(amp)  << endl;
         }
         pwave.close();
         system("gnuplot ./src/gnuplot/graph.p");
 
         // for (int i = 0; i < 11; i++)
         // {
-        //         s = 0. + .2*double(i);
-        //         t = t_man(s, 1.);
-        //         u = u_man(s, 1.);
-        //         cout << n_amp(1, alph, a[1], s, t) << endl;
+        // s = 0. + .2*double(i);
+        // t = t_man(s, 1.);
+        // u = u_man(s, 1.);
+        // cout << n_amp(1, alph, a[1], s, t) << endl;
         // }
+
         return 0;
 }
