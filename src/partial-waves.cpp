@@ -11,14 +11,14 @@
 // Mandelstam variables t and u as functions of s and s-channel scattering angle z
 double t_man(double s, double z)
 {
-        double psqr = (s - 4.*pow(xmpi,2.))/4.;
+        double psqr = (s - 4.*pow(mPi,2.))/4.;
         double result = -2.*psqr* (1. - z);
         return result;
 }
 
 double u_man(double s, double z)
 {
-        double psqr = (s - 4.*pow(xmpi,2.))/4.;
+        double psqr = (s - 4.*pow(mPi,2.))/4.;
         double result = -2.*psqr* (1. + z);
         return result;
 }

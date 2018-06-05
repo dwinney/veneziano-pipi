@@ -23,7 +23,7 @@ cd rtraj(double a0, double ap, double s)
 //Complex Regge Trajectory (w/ Phase Space factor)
 cd ctraj(double a0, double ap, double s)
 {
-        cd phase_space = sqrt(cd(s - 4.*pow(xmpi, 2.)));
+        cd phase_space = sqrt(cd(s - 4.*pow(mPi, 2.)));
         cd result = a0 + ap*s + xi*ap*m_res*gamma_res*phase_space;
         return result;
 }

@@ -47,44 +47,34 @@ cd isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double t
 }
 
 //TODO: Documentation.
-
+//TODO: S2 wave doesnt perfectly match?
 double phase_shift(int l, int iso, double s)
 {
         int wave = (3*l - iso)/2;
         if (iso > 2 || iso < 0 || l < 0) {wave = 600;}
 
-        double mPi, mK, mEta, sthPi, sthK, sthEta;
-        //Masses
-        mPi = 0.1396;
-        mK = 0.496;
-        mEta = 0.54753;
+        double cot_delta, k;
+        k = elastic_mom(s, sthPi); //momentum
 
-        //Thresholds for pi, eta, and K
-        sthPi = 4.*pow(mPi, 2.) - pow(1.l, -8.);
-        sthK = 4.*pow(mK, 2.);
-        sthEta = 4.*pow(mEta, 2.);
-
-        switch (wave) {
-        //S2 - wave (l = 0, iso = 2)
-        case -1:
-                double cot_delta;
+//S2 - wave (l = 0, iso = 2)
+        if (wave == -1)
+        {
                 double temp1, temp2, temp3;
-                double B0, B1, z2, wl, k;
+                double B0, B1, z2, wl;
                 double sh, sl, sm;
 
                 sl = pow(1.05, 2.);
                 sm = pow(.850, 2.);
                 sh = pow(1.42, 2.);
 
-                z2 = .1435;
-                k = elastic_mom(s, sthPi);
                 wl = conformal(s, sl);
 
+                z2 = .1435;
                 B0 = -79.4;
                 B1 = -63.0;
 
                 temp1 = sqrt(s) / (2.*k);
-                temp2 = pow(mPi, 2.) / (s - 2.*pow(z2,2.));
+                temp2 = mPi*mPi / (s - 2.*z2*z2);
 
                 if ((s > sthPi) && (s <= sm)) //Low energy parameterization
                 {
@@ -101,29 +91,104 @@ double phase_shift(int l, int iso, double s)
                         wlsm = conformal(sm, sl);
 
                         Bh2 = 32.;
-                        Bh0 = B0 + B1 * wlsm; // see wl above
+                        Bh0 = B0 + B1 * wlsm;
                         temp4 = pow((sqrt(sm) + sqrt(sh - sm)) / (sqrt(sm) + sqrt(sl - sm)), 2.);
-                        Bh1 = B1* (sl / sh) * (sqrt(sh - sm) / sqrt(sl - sm)) * temp4;
+                        Bh1 = B1 * (sl / sh) * (sqrt(sh - sm) / sqrt(sl - sm)) * temp4;
 
                         temp3 = Bh0 + Bh1*(wh - whsm) + Bh2*pow(wh - whsm, 2.);
 
                         cot_delta = temp1 * temp2 * temp3;
 
                 }
-                else{break;}
-                return atan(1. / cot_delta);
-                break;
+                return atan2(1., cot_delta);
+        }
 
-        case 0:
+        if (wave == 0)
+        {
                 cout << "S0 wave >:O" << endl;
-                break;
+        }
 
-        default:
+//P1 - wave (l = 1, iso = 1)
+        if (wave == 1)
+        {
+                double sh, s0, w;
+                double temp1, temp2, temp3;
+
+                s0 = pow(1.05, 2.);
+                sh = pow(1.42, 2.);
+                w = conformal(s, s0);
+
+                if ((s > sthPi) && (s < sthK))
+                {
+                        double B0, B1;
+                        B0 = 1.043;
+                        B1 = .19;
+
+                        temp1 = sqrt(s)*(mRho*mRho - s)/(2. * pow(k, 3.));
+                        temp2 = 2.*pow(mPi, 3.)/(mRho*mRho*sqrt(s));
+
+                        cot_delta = temp1*(temp2 + B0 + B1* w);
+                        return atan2(1., cot_delta);
+                }
+                else if ((s > sthK) && (s <= sh))
+                {
+                        double lambda0, lambda1, lambda2;
+                        lambda1 = 1.38;
+                        lambda2 = -1.70;
+
+                }
+        }
+        else
+        {
                 cout << "Invalid Phase Shift with l = " << l << " and isospin = " << iso << ". Quiting..." << endl;
                 exit(1);
 
         }
-        return 0.;
+}
+
+double inelasticity(int l, int iso, double s)
+{
+        double eta;
+
+
+        //Purely elastic below KK threshold
+        if ((s > sthPi) && (s<= sthK))
+        {
+                eta = 1;
+        }
+
+        else
+        {        int wave = (3*l - iso)/2;
+                 if (iso > 2 || iso < 0 || l < 0) {wave = 600;}
+
+                 //S2 - wave (l = 0, iso = 2)
+                 if (wave == -1)
+                 {
+                         double sl, sh;
+                         sl = pow(1.05, 2.);
+                         sh = pow(1.42, 2.);
+
+                         if ((s > sthPi) && (s <= sl)) //Low energy parameterization
+                         {
+                                 eta = 1;
+                         }
+                         else if ((s > sl) && ( s <= sh)) //Intermediate energies
+                         {
+                                 double eps = .28;
+
+                                 eta = 1. - eps*pow(1 - (sl/s), 1.5);
+                         }
+                         return eta;
+                 }
+                 else if (wave == 0)
+                 {
+                         cout << "S0 wave >:O" << endl;
+                 }
+                 else
+                 {
+                         cout << "Invalid Inelasticity with l = " << l << " and isospin = " << iso << ". Quiting..." << endl;
+                         exit(1);
+                 }}
 }
 
 //Returns conformal variable given Mandelstam s and branchign point s0.

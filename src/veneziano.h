@@ -14,10 +14,19 @@ using namespace std;
 typedef complex<double> cd;
 
 const double pi = 3.1415926535897932384626433832795028841972;
-
-const double xmpi = 0.13957018; //Pion Masss in GeV
 const double gamma_res = .145; //Width of resonance, this case the rho
 const double m_res = .77545; //Mass of resonance (rho)
+
+//Masses
+const double mRho = .77545;
+const double mPi = 0.1396;
+const double mK = 0.496;
+const double mEta = 0.54753;
+
+//Thresholds for pi, eta, and K
+const double sthPi = 4.*pow(mPi, 2.);
+const double sthK = 4.*pow(mK, 2.);
+const double sthEta = 4.*pow(mEta, 2.);
 
 //Unit imaginary and real
 const cd xr(1., 0.);
@@ -35,6 +44,7 @@ cd n_amp(int n, double alph[], double coupling[], double s, double t);
 //pipi-amp.cpp
 cd isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double t, double u);
 double phase_shift(int l, int iso, double s);
+double inelasticity(int l, int iso, double s);
 double conformal(double s, double s0);
 double elastic_mom( double s, double sth);
 
