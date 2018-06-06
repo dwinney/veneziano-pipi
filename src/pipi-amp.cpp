@@ -10,8 +10,6 @@
 //TODO: Uncouple from big header.
 #include  "veneziano.h"
 
-
-
 //TODO: Figure out how to get rid of global variables.
 //TODO: Add Error Message if n > maxN.
 
@@ -46,15 +44,21 @@ cd isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double t
         return amp;
 }
 
-//TODO: Documentation.
+//Produces the Phase-shift for given Partial Wave as function of s.
+// Based on parameterizations from CFD Set:
+// R. Garcia-Martin, R. Kaminski, J. R. Palaez, J. Ruiz de Elvira, F. J. Yndurain
+// Phys. Rev. D 83, 074004 (2011).
+//
+// Ported from A. Jackura and N. Sherrill's fortran code
+// ajackura@indiana.edu, nlsherri@indiana.edu
 double phase_shift(int l, int iso, double s)
 {
         //Error Checks :)
         int wave = (3*l - iso)/2;
         if (iso > 2 || iso < 0) {wave = 600;}
         if (l % 2 != iso % 2) {wave = 600;}
-        if (l > 4)
-        {cout << "Contributions of l > 3 are completely negligable. Quitting..." << endl;;
+        if (l >= 4 && wave != 600)
+        {cout << "Phase shift contributions of l > 3 are completely negligible. Quitting..." << endl;;
          exit (1);}
 
         double cot_delta, delta, sh;
@@ -117,7 +121,75 @@ double phase_shift(int l, int iso, double s)
 //S0 wave (l = 0, iso = 0)
         if (wave == 0)
         {
-                cout << "S0 wave >:O" << endl;
+                double sm = pow(0.85, 2.);
+                double B0, B1, B2, B3, w;
+                B0 = 7.14;
+                B1 = -25.3;
+                B2 = -33.2;
+                B3 = -26.2;
+                w = conformal(s, sthK);
+
+                if ((s > sthPi) && (s <= sm)) //Low energy parameterization
+                {
+                        temp1 = sqrt(s) / (2.*k);
+                        temp2 = mPi * mPi / (s - 0.5 * mPi * mPi);
+                        temp3 = mPi / sqrt(s);
+
+                        cot_delta = temp1 * temp2 * (temp3 + B0 + B1 * w + B2 * w * w + B3 *w*w*w);
+                        delta = atan2(1., cot_delta);
+                }
+                else if (s < sh)
+                {
+                        double d0, C1, B, C2, D;
+                        double k2, k2m;
+
+                        d0 = 226.5 * conv; //converting to radians
+                        C1 = -81. * conv;
+                        B = 93.3 * conv;
+                        C2 = 48.7 * conv;
+                        D = -88.3 * conv;
+
+                        k2 = elastic_mom(s, sthK);
+                        k2m = elastic_mom(sm, sthK);
+
+                        if ((s > sm) && (s < sthK)) // intermediate energy
+                        {
+                                double cot_delm, delm, delPm, km, wm;
+                                double temp4, temp5, temp6;
+
+                                temp4 = pow(1. - (k2 / k2m), 2.);
+                                temp5 = k2 * (2. - (k2 / k2m)) / k2m;
+                                temp6 = (k2m - k2) / pow(mK, 3.);
+
+                                //Calculate delta(sm)
+                                wm = conformal(sm, sthK);
+                                km = elastic_mom(sm, sthPi);
+                                temp1 = sqrt(sm) / (2. * km);
+                                temp2 = mPi * mPi / (sm - 0.5 * mPi * mPi);
+                                temp3 = mPi / sqrt(sm);
+                                cot_delm = temp1 * temp2 * (temp3 + B0 + B1 * wm + B2 * wm * wm + B3 *wm*wm*wm);
+                                delm = atan2(1., cot_delm);
+
+                                //Derivative calculated in Mathematica (because im lazy)
+                                delPm = 1.588503;
+
+                                delta = d0 * temp4 + delm * temp5 + k2 * (k2m - k2) * (8.*delPm + C1 * temp6);
+                        }
+
+                        if ((s > sthK) && (s < sh)) //above KK threshold
+                        {
+                                temp1 = (k2*k2) / (mK * mK);
+                                delta = d0 + B*temp1 + C2 * temp1*temp1;
+
+                                if (s > sthEta)
+                                {
+                                        double k3 = elastic_mom(s, sthEta);
+                                        temp2 = D * (k3*k3) / (mEta * mEta);
+                                        delta += temp2;
+                                }
+                        }
+                }
+                return delta;
         }
 
 //P1 wave (l = 1, iso = 1)
@@ -229,7 +301,29 @@ double phase_shift(int l, int iso, double s)
                 else {delta = 0.;}
         }
 
-//Anything else
+//F1 wave (l = 3, iso = 1)
+        else if (wave == 4)
+        {
+                if ((s > sthPi) && (s < sh))
+                {
+                        double B0, B1, lambda;
+                        double s0, w;
+
+                        s0 = pow(1.45, 2.);
+                        w = conformal(s, s0);
+                        B0 = 1.09e5;
+                        B1 = 1.41e5;
+                        lambda = 0.051e5;
+
+                        temp1 = sqrt(s)*pow(mPi, 6.) / (2.*pow(k, 7.));
+                        temp2 = 2.*lambda * mPi / sqrt(s);
+
+                        cot_delta = temp1 * (temp2 + B0 + B1 * w);
+                        delta = atan2(1., cot_delta);
+                }
+        }
+
+//Unphysical partial waves (ie anything else)
         else
         {
                 cout << "Invalid Phase Shift with l = " << l << " and isospin = " << iso << ". Quiting..." << endl;
@@ -238,6 +332,13 @@ double phase_shift(int l, int iso, double s)
         }
 }
 
+//Produces the Inelasticity for given Partial Wave as a function of s.
+// Based on CFD parameterizations from:
+// R. Garcia-Martin, R. Kaminski, J. R. Palaez, J. Ruiz de Elvira, F. J. Yndurain
+// Phys. Rev. D 83, 074004 (2011).
+//
+// Ported from A. Jackura and N. Sherrill's fortran code
+// ajackura@indiana.edu, nlsherri@indiana.edu
 double inelasticity(int l, int iso, double s)
 {
         double eta;
@@ -245,8 +346,8 @@ double inelasticity(int l, int iso, double s)
 
         int wave = (3*l - iso)/2;
         if (iso > 2 || iso < 0 || l < 0) {wave = 600;}
-        if (l % 2 != iso % 2) {wave = 600;}
-        if (l > 3) {return eta = 1.;} //Inelasticities for high partial waves negligable
+        if (l % 2 != iso % 2) {wave = 600;} //Check Bose symmetry
+        if (l >= 3 && wave != 600) {return eta = 1.;} //Inelasticities for high partial waves are negligable
 
 //S2 wave (l = 0, iso = 2)
         if (wave == -1)
@@ -269,7 +370,35 @@ double inelasticity(int l, int iso, double s)
 //S0 wave (l = 0, iso = 0)
         else if (wave == 0)
         {
-                cout << "S0 wave >:O" << endl;
+                if ((s > sthPi) && (s <= sthK))
+                {
+                        eta = 1.;
+                }
+                else if ((s > sthK) && (s < sh))
+                {
+                        double ep1, ep2, ep3;
+                        double k2;
+                        double temp1, temp2, temp3;
+
+                        ep1 = 4.9;
+                        ep2 = -15.1;
+                        ep3 = 4.7;
+                        k2 = elastic_mom(s, sthK);
+
+                        temp1 = -k2 / sqrt(s);
+                        temp2 = ep1 + ep2 * (k2/sqrt(s)) + ep3 * (k2 * k2 / s);
+                        temp3 = temp1 * temp2 * temp2;
+                        if (s > sthEta)
+                        {
+                                double ep4, k3;
+                                ep4 = 0.32;
+                                k3 = elastic_mom(s, sthEta);
+
+                                temp3 += -ep4 * k3 / sqrt(s);
+                        }
+                        eta = exp(temp3);
+                }
+                return eta;
         }
 
 //P1 wave (l = 1, iso = 1)
@@ -308,7 +437,7 @@ double inelasticity(int l, int iso, double s)
                 return eta;
         }
 
-//D0 wave (l = 1, iso = 0)
+//D0 wave (l = 2, iso = 0)
         else if (wave == 3)
         {
                 if ((s > sthPi) && (s <= sthK))
@@ -331,8 +460,7 @@ double inelasticity(int l, int iso, double s)
                 return eta;
         }
 
-
-//Anything else
+//Unphysical partial waves (ie anything else)
         else
         {
                 cout << "Invalid Inelasticity with l = " << l << " and isospin = " << iso << ". Quiting..." << endl;
@@ -340,15 +468,16 @@ double inelasticity(int l, int iso, double s)
         }
 }
 
-//Returns conformal variable given Mandelstam s and branchign point s0.
+//Returns conformal variable given Mandelstam s and branching point s0.
 double conformal(double s, double s0)
 {
-        double numerator = sqrt(s) - sqrt(s0 - s);
-        double denominator = sqrt(s) + sqrt(s0 - s);
+        double numerator = sqrt(s) - sqrt(abs(s0 - s));
+        double denominator = sqrt(s) + sqrt(abs(s0 - s));
         return numerator/denominator;
 }
 
+// Elastic momentum above threshold sth, as a function of s.
 double elastic_mom( double s, double sth)
 {
-        return sqrt(s - sth) / 2.;
+        return sqrt(abs(s - sth)) / 2.;
 }

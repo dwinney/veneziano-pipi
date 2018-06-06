@@ -16,6 +16,7 @@ typedef complex<double> cd;
 const double pi = 3.1415926535897932384626433832795028841972;
 const double gamma_res = .145; //Width of resonance, this case the rho
 const double m_res = .77545; //Mass of resonance (rho)
+const double conv = (pi / 180.);
 
 //Masses
 const double mPi = 0.1396;
