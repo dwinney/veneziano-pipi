@@ -10,14 +10,14 @@ vpath %.cpp src
 vpath %.h src
 vpath %.o src/obj
 
-mains 		=	$(addprefix $(OBJ_DIR)/, main.o phase-shift.o)
-objects 	= $(addprefix $(OBJ_DIR)/, pipi-amp.o venez-amp.o cgamma.o gauleg.o partial-waves.o)
+mains 		=	$(addprefix $(OBJ_DIR)/, main.o GKPRY.o)
+objects 	= $(addprefix $(OBJ_DIR)/, pipi-amp.o venez-amp.o cgamma.o gauleg.o GKPRY-eq.o)
 directories	 = ./src/obj ./output
 
 $(objects)	  : 	$(OBJ_DIR)/%.o :  %.cpp veneziano.h
 						g++ -c $< -o $@
 
-$(mains) 			:	$(OBJ_DIR)/%.o	 : 	%.cpp veneziano.h $(objects)
+$(mains) 			:		$(OBJ_DIR)/%.o	 : 	%.cpp veneziano.h $(objects)
 						g++ -c $< -o $@
 
 $(directories) :
@@ -27,8 +27,8 @@ $(directories) :
 rho 					 : 	$(directories)	$(objects) $(OBJ_DIR)/main.o
 				g++ -o rho $(objects) $(OBJ_DIR)/main.o
 
-phase-shift		 :	$(directories)	$(objects) $(OBJ_DIR)/phase-shift.o
-				g++ -o phase-shift $(objects) $(OBJ_DIR)/phase-shift.o
+GKPRY		 :	$(directories)	$(objects) $(OBJ_DIR)/GKPRY.o
+				g++ -o GKPRY $(objects) $(OBJ_DIR)/GKPRY.o
 
 
 .PHONY		 : clean clean-out spotless clean-exe

@@ -50,6 +50,10 @@ double phase_shift(int l, int iso, double s);
 double inelasticity(int l, int iso, double s);
 double conformal(double s, double s0);
 double elastic_mom( double s, double sth);
+complex<double> GKPRY_partial_wave(int l, int iso, double s);
+complex<double> GKPRY_iso_amp(int iso, double s, double z);
+complex<double> GKPRY_amplitude(double s, double z);
+double GKPRY_cross_section(double s);
 
 //partial-waves.cpp
 double u_man(double s, double z);
