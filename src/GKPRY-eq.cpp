@@ -482,6 +482,12 @@ complex<double> GKPRY_iso_amp(int iso, double s, double z)
                 {
                         l = 2*i + 1;
                 }
+                if (iso > 2 || iso < 0)
+                {
+                        cout << "Something Wrong!" << endl;
+                        exit(1);
+                }
+
 
                 Pl = legendre(l, z);
                 pw = GKPRY_partial_wave(l, iso, s);
@@ -497,9 +503,9 @@ complex<double> GKPRY_amplitude(double s, double z)
         double clebsch[3] = {.33, .5, .1666}; // Isospin clebsch-gordon coeffs
         complex<double> amp;
 
-        for (int iso; iso < 3; iso++)
+        for (int o = 0; o < 3; o++)
         {
-                amp += clebsch[iso] * GKPRY_iso_amp(iso, s, z);
+                amp += clebsch[o] * GKPRY_iso_amp(o, s, z);
         }
         return amp;
 }

@@ -13,18 +13,20 @@
 //Real Linear Regge Trajectory
 // a0 - intercept (~ .5 for rho)
 // ap - slope parameter (~ .09 for rho)
-cd rtraj(double a0, double ap, double s)
+cd rtraj(double alph[], double s)
 {
-        cd result = a0 + ap*s;
+        cd result = alph[0] + alph[1]*s;
         return result;
 }
 
 //TODO: Remove the global variables for gamma_res and m_res
 //Complex Regge Trajectory (w/ Phase Space factor)
-cd ctraj(double a0, double ap, double s)
+cd ctraj(double alph[], double s)
 {
         cd phase_space = sqrt(cd(s - 4.*pow(mPi, 2.)));
-        cd result = a0 + ap*s + xi*ap*m_res*gamma_res*phase_space;
+        cd imagpart = xi * alph[2];
+        cd result = alph[0] + alph[1] * s + imagpart * phase_space;
+        // cout << result << endl;
         return result;
 }
 
@@ -34,10 +36,10 @@ cd ctraj(double a0, double ap, double s)
 // coupling[] - array of size n + 1 with couplings a_n,i for fixed n
 cd n_amp(int n, double alph[], double coupling[], double s, double t)
 {
-        cd s_alpha = rtraj(alph[0], alph[1], s);
-        cd t_alpha = rtraj(alph[0], alph[1], t);
-        cd cs_alpha = ctraj(alph[0], alph[1], s);
-        cd ct_alpha = ctraj(alph[0], alph[1], t);
+        cd s_alpha = rtraj(alph, s);
+        cd t_alpha = rtraj(alph, t);
+        cd cs_alpha = ctraj(alph, s);
+        cd ct_alpha = ctraj(alph, t);
         cd nn = double(n)*xr;
 
         //Prefactor containing the sum of two poles one in each variable

@@ -18,17 +18,21 @@
 //          coup - couplings matrix a_n,i
 //          alph - Regge trajectory parameters
 //          s, t, u - Mandelstam Variables
-complex<double> isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double t, double u)
+complex<double> VENEZ_isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double z)
 {
-        double couplings[6];
+        double couplings[6], n_coup[maxN+1];
         complex<double> amp = 0.;
-        double n_coup[maxN+1];
-        for (int n = 1; n < maxN + 1; n++)
+        double t, u;
+
+        t = t_man(s, z); u = u_man(s, z);
+
+        for (int n = 0; n < maxN + 1; n++)
         {
-                for (int i = 1; i < maxN+1; i++)
+                for (int i = 0; i < maxN+1; i++)
                 {
                         n_coup[i] = coup[n][i];
                 }
+                // cout << n_coup[0] << " " << n_coup[1] << " " << n_coup[2] << " " << n_coup[3] << endl;
                 switch (iso) {
                 case 0: amp += n_amp(n, alph, n_coup, t, u) - 3. *(n_amp(n, alph, n_coup, s, u) + n_amp(n, alph, n_coup, s, t));
                         break;
@@ -91,9 +95,9 @@ double legendre(int l, double x)
 // iso - isospin projection ( iso = 1, 2, 3)
 // coup - a_n,i matrix of couplings
 // alph - regge trajectory parameters
-cd partial_wave(int l, int iso, double coup[][maxN+1], double alph[], double s)
+complex<double> VENEZ_partial_wave(int l, int iso, double coup[][maxN+1], double alph[], double s)
 {
-        double Pl, z, t, u;
+        double Pl, z;
         double weights[INTP], abscissas[INTP];
         cd sum;
 
@@ -104,21 +108,29 @@ cd partial_wave(int l, int iso, double coup[][maxN+1], double alph[], double s)
         for (int i = 0; i < INTP; i++)
         {
                 z = abscissas[i];
-                t = t_man(s, z);
-                u = u_man(s, z);
-
                 Pl = legendre(l, z);
-                sum += weights[i]*Pl*isospin_amp(iso, coup, alph, s,t,u);
+                sum += weights[i]*Pl*VENEZ_isospin_amp(iso, coup, alph, s, z);
         }
         return .5*sum;
 }
 
-double cross_section(int iso, double coup[][maxN+1], double alph[], double s, double z)
+complex<double> VENEZ_amplitude(double coup[][maxN+1], double alph[], double s, double z)
 {
-        double t, u;
-        t = t_man(s, z);
-        u =u_man(s, z);
-        cd amp = isospin_amp(iso, coup, alph, s, t, u);
-        cd result = amp*conj(amp);
-        return real(result);
+        double clebcsh[3] = {.33333, .5, 1.6666};
+        complex<double> amp;
+
+        for (int i = 0; i < 3; i++)
+        {
+                amp += clebcsh[i] * VENEZ_isospin_amp(i, coup, alph, s, z);
+        }
+        return amp;
+}
+
+double VENEZ_cross_section(double coup[][maxN+1], double alph[], double s)
+{
+        double k = elastic_mom(s, sthPi);
+        complex<double> amp = VENEZ_amplitude(coup, alph, s, 1.);
+
+        double sigma = imag(amp) / (2. * sqrt(s) * k );
+        return sigma;
 }

@@ -1,8 +1,8 @@
 CXX 			= $(shell root-config --cxx)
 LD 				= $(shell root-config --ld)
 
-CPPFLAGS 	:= $(shell root-config --cflags) $(STDINCDIR)
-LDFLAGS 	:= -Xlinker -rpath . $(shell root-config --glibs) $(STDLIBDIR)
+CPPFLAGS 	:= $(shell root-config --libs --cflags) $(STDINCDIR)
+LDFLAGS 	:= -Xlinker -rpath . $(shell root-config --glibs) -lMinuit $(STDLIBDIR)
 
 OBJ_DIR 	= src/obj
 
@@ -24,23 +24,29 @@ $(directories) :
 						@echo "Creating folder: $@" && \
     				mkdir -p $@
 
+$(OBJ_DIR)/fitting.o	: fitting.cpp veneziano.h
+							$(CXX) $(CPPFLAGS) -o $@ -c $<
+
 rho 					 : 	$(directories)	$(objects) $(OBJ_DIR)/main.o
 				g++ -o rho $(objects) $(OBJ_DIR)/main.o
 
 GKPRY		 :	$(directories)	$(objects) $(OBJ_DIR)/GKPRY.o
 				g++ -o GKPRY $(objects) $(OBJ_DIR)/GKPRY.o
 
+fit				: $(directories)	$(objects) $(OBJ_DIR)/fitting.o
+						$(LD) -o fit $(objects) $(OBJ_DIR)/fitting.o $(LDFLAGS)
+
 
 .PHONY		 : clean clean-out spotless clean-exe
 
 spotless	 :
-						rm -rf ./output ./src/obj rho phase-shift
+						rm -rf ./output ./src/obj rho GKPRY fit
 
 clean 		 :
 						clean-exe clean-out
 
 clean-exe	 :
-						rm -rf rho phase-shift ./src/obj
+						rm -rf rho GKPRY fit ./src/obj
 
 clean-out	 :
 						rm -rf ./output

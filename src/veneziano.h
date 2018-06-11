@@ -36,16 +36,17 @@ const cd xr(1., 0.);
 const cd xi(0., 1.);
 
 #define backN   20.*xr  //Background N, just needs to be "large enough"
-#define maxN    6       //Truncated maximum n
+#define maxN    3       //Truncated maximum n
 #define INTP    500     //Number of points for numerical integration
+extern double data_real[1938];
 
 //amp.cpp
-cd rtraj(double a0, double ap, double s);
-cd ctraj(double a0, double ap, double s);
+cd rtraj(double alph[], double s);
+cd ctraj(double alph[], double s);
 cd n_amp(int n, double alph[], double coupling[], double s, double t);
 
 //pipi-amp.cpp
-cd isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double t, double u);
+complex<double> VENEZ_isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double z);
 double phase_shift(int l, int iso, double s);
 double inelasticity(int l, int iso, double s);
 double conformal(double s, double s0);
@@ -60,8 +61,9 @@ double u_man(double s, double z);
 double t_man(double s, double z);
 double kallen(double s, double t, double u);
 double legendre(int l, double x);
-cd partial_wave(int l, int iso, double coup[][maxN+1], double alph[], double s);
-double cross_section(int iso, double coup[][maxN+1], double alph[], double s, double z);
+complex<double> VENEZ_partial_wave(int l, int iso, double coup[][maxN+1], double alph[], double s);
+complex<double> VENEZ_amplitude(double coup[][maxN+1], double alph[], double s, double z);
+double VENEZ_cross_section(double coup[][maxN+1], double alph[], double s);
 
 //misc math stuff
 cd cgamma(cd z);

@@ -22,28 +22,28 @@ int main(int argc, char ** argv)
         }
 
         smax = pow(1.42, 2.);
-        step = .0001;
+        step = .001;
 
         nstep = (int) ((smax - sthPi) / step);
+        cout << nstep << endl;
 
         ofstream gkpry;
         gkpry.open("./output/GKPRY.dat");
-        gkpry << left << setw(30) << "#sqrt(s)" << setw(30) << "delta"
-              << setw(30) << "eta" << setw(30) << "A" << setw(30)
-              << "sigma" << endl;
+        // gkpry << left << setw(30) << "#sqrt(s)" << setw(30) << "delta"
+        //       << setw(30) << "eta" << setw(30) << "A" << setw(30)
+        //       << "sigma" << endl;
         for (int i = 0; i < nstep; i++)
         {
                 s = sthPi + 1e-5 + step * double(i); //offset threshold
 
                 sigma = GKPRY_cross_section(s);
                 gkpry << left << setw(30) << sqrt(s);
-                cout << sigma << endl;
 
                 if (l >= 0)
                 {
                         delta = phase_shift(l, iso, s);
                         eta = inelasticity(l, iso, s);
-                        amp = GKPRY_partial_wave(l, iso, s);
+                        amp = GKPRY_iso_amp(iso, s, 1.);
                         gkpry << setw(30) << delta << setw(30) <<  eta
                               << setw(30) << real(amp) << setw(30) << imag(amp);
                 }
