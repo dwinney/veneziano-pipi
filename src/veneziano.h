@@ -35,10 +35,9 @@ const double sthEta = 4.*mEta*mEta;
 const cd xr(1., 0.);
 const cd xi(0., 1.);
 
-#define backN   20.*xr  //Background N, just needs to be "large enough"
+#define backN   10.*xr  //Background N, just needs to be "large enough"
 #define maxN    3       //Truncated maximum n
 #define INTP    500     //Number of points for numerical integration
-extern double data_real[1938];
 
 //amp.cpp
 cd rtraj(double alph[], double s);
@@ -68,3 +67,9 @@ double VENEZ_cross_section(double coup[][maxN+1], double alph[], double s);
 //misc math stuff
 cd cgamma(cd z);
 void gauleg(double x1, double x2, double x[], double w[], int n);
+
+
+
+extern double s_dat[], re_dat[], im_dat[];
+extern int ISOCHOICE;
+void get_Data();
