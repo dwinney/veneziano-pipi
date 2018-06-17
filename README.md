@@ -35,7 +35,7 @@ To use: ``./pipi FILE (PATH TO FILE) (OUTPUT FILE NAME)``.
 ###### EXAMPLE
 To produce the P1-wave Veneziano partial wave from couplings in ./example_coup.dat:
 ```
-./pipi VENEZ partial P1 ./example_cout.dat
+./pipi plot VENEZ partial P1 ./example_cout.dat
 ```
 
 #### FITTING
