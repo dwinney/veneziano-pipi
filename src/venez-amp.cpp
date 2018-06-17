@@ -4,7 +4,7 @@
 //
 // Author:       Daniel Winney (2018)
 // Affiliation:  Joint Physics Analysis Center (JPAC)
-// Email:        dwinney@giu.edu
+// Email:        dwinney@iu.edu
 // ---------------------------------------------------------------------------
 
 //TODO: Uncouple from big header.
@@ -24,8 +24,8 @@ cd rtraj(double alph[], double s)
 cd ctraj(double alph[], double s)
 {
         cd phase_space = sqrt(cd(s - 4.*pow(mPi, 2.)));
-        cd imagpart = xi * alph[2];
-        cd result = alph[0] + alph[1] * s + imagpart * phase_space;
+        cd imagpart = xi * alph[2] * mres;
+        cd result = alph[0] + alph[1] *(s - mres*mres)  + imagpart * phase_space;
         // cout << result << endl;
         return result;
 }
@@ -56,9 +56,8 @@ cd n_amp(int n, double alph[], double coupling[], double s, double t)
         cd sum, ii;
         for (int i = 1; i < n + 1; i++)
         {
-                ii = double(i)*xr-1.;
-                sum += coupling[i]*pow(-(s_alpha + t_alpha), ii);
-
+                ii = double(i)*xr- 1.;
+                sum += coupling[i] * pow(-(s_alpha + t_alpha), ii);
         }
 
         cd result = coeff*background*sum;

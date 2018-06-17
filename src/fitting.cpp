@@ -1,20 +1,23 @@
 #include "veneziano.h"
+
 #include <TFitter.h>
 #include <TMinuit.h>
 #include <TROOT.h>
 #include <TMath.h>
 
-
 double s_dat[1000], re_dat[1000], im_dat[1000];
 int ISOCHOICE;
 
+//Function to import amplitude data to be fit from file.
+//Three columns s values, real part, imaginary part
+//TODO: have general fit file name
 void get_Data()
 {
         string filename = "./output/data.dat";
         ifstream infile(filename.c_str());
         if (infile.fail())
         {
-                cout << "Couldn't open data file. Quiting..." << endl;
+                cout << " Couldn't open data file. Quiting..." << endl;
                 exit(1);
         }
         else{
@@ -26,11 +29,13 @@ void get_Data()
                         infile >> im_dat[n];
                         n++;
                 }
-                cout << "Imported data from: " << filename << endl;
-                cout << "-------------------------------------------------------------" << endl;
+                cout << " Imported data from: " << filename << endl;
+
         }
 }
 
+//chi-square of the amplitude of given isospin to data.
+//fits both real and imaginary parts simultaneously.
 double chi_square(double coup[][maxN+1], double alph[])
 {
         double chi = 0.;
@@ -42,13 +47,14 @@ double chi_square(double coup[][maxN+1], double alph[])
         for (int i = 0; i < 100; i++)
         {
                 s = s_dat[i];
-                VENEZ = VENEZ_isospin_amp(ISOCHOICE, coup, alph, s, 1.);
+                VENEZ = VENEZ_iso_amp(ISOCHOICE, coup, alph, s, 1.);
                 chi += pow(((re_dat[i] - real(VENEZ)) / error), 2.);
                 chi += pow(((im_dat[i] - imag(VENEZ)) / error), 2.);
         }
         return chi;
 }
 
+//Wrapper function to
 static void WRAPPER(int& npar, double* g, double& result, double *par, int flag)
 {
         double coup[4][4];
@@ -71,19 +77,19 @@ static void WRAPPER(int& npar, double* g, double& result, double *par, int flag)
 int main(int argc, char* argv[])
 {
         cout << endl;
-        cout << "-------------------------------------------------------------" << endl;
         setprecision(10);
         int np = 100;
         int iso = 600;
+        int plot = -1;
         for (int ii = 0; ii < argc; ii++)
         {
                 if (strcmp(argv[ii],"-i")==0) iso = atof(argv[ii+1]);
-                // if (strcmp(argv[ii], "-make")==0) make = 1;
+                if (strcmp(argv[ii], "-plot")==0) plot = 1;
                 // if (strcmp(argv[ii], "-n")==0) np = atoi(argv[ii+1]);
         }
 
         if (iso > 2)
-        { cout << "Input valid Isospin to fit [-i isospin]. Quitting..." << endl;
+        { cout << " Input valid Isospin to fit [-i isospin]. Quitting..." << endl;
           exit(1);}
 
         ISOCHOICE = iso;
@@ -94,8 +100,10 @@ int main(int argc, char* argv[])
         smax = pow(1.42, 2.);
         step = (smax - sthPi) / double(np);         //get stepsize
 
-        cout << "Printing Isospin-" << ISOCHOICE << " GKPY amplitude to ./output/data.dat" << endl;
-        cout << "Using " << np << " data points. Step size = " << step << " GeV^2" << endl;
+        cout << "-------------------------------------------------------------" << endl;
+        cout << " Printing Isospin-" << ISOCHOICE << " GKPY amplitude to ./output/data.dat" << endl;
+        cout << " Using " << np << " data points. Step size = " << step << " GeV^2" << endl;
+
         ofstream data;
         data.open("./output/data.dat");
         for (int i = 0; i < np; i++)
@@ -107,23 +115,24 @@ int main(int argc, char* argv[])
         data.close();
 
         get_Data();
-
+        cout << "-------------------------------------------------------------" << endl;
+        cout << endl;
+        cout << "-------------------------------------------------------------" << endl;
         TMinuit minuit(9);
         minuit.SetFCN(WRAPPER);
 
-        double start[3], stepsiz[7], min[7], max[7];
+        double start[3], stepsiz[4], min[4], max[4];
 
         //alpha_0
-        start[0] = 0.124; stepsiz[0] = 0.01;
-        min[0] = 0.; max[0] = .25;
+        start[0] = .2; stepsiz[0] = 0.1;
+        min[0] = 0.; max[0] = 1.5;
         //alpha^p
-        start[1] = 1.316; stepsiz[1] = 0.05;
-        min[1] = .5; max[1] = 1.5;
+        start[1] = 0.75; stepsiz[1] = 0.1;
+        min[1] = 0.5; max[1] = 1.5;
         //width
         start[2] = .164; stepsiz[2] = .05;
-        min[2] = 0.01; max[2] = 1.;
-
-        //a1,1
+        min[2] = 0.0; max[2] = 1.;
+        //couplings
         start[3] = 0.; stepsiz[3] = 2.;
         min[3] = -0.; max[3] = -0.;
 
@@ -147,14 +156,12 @@ int main(int argc, char* argv[])
         minuit.mnexcm("SET STR", arglist, 1, ierflg);
         minuit.SetErrorDef(1); //1 for chi square
 
-        // arglist[0]=0;
-        // minuit.mnexcm("SCAN", arglist, 1, ierflg);
-
+        // PRESERVE BOSE SYMMETRY
         if (ISOCHOICE == 0 || ISOCHOICE == 2)
         {
                 minuit.FixParameter(3);
                 minuit.FixParameter(4);
-                minuit.FixParameter(7);
+                minuit.FixParameter(6);
                 minuit.FixParameter(8);
         }
         else if (ISOCHOICE == 1)
@@ -165,8 +172,16 @@ int main(int argc, char* argv[])
 
         arglist[0] = 1000;
         minuit.mnexcm("SIMPLEX", arglist,1,ierflg);
+        // minuit.mnexcm("MINIMIZE", arglist, 1, ierflg);
         minuit.mnexcm("MIGRAD", arglist, 1, ierflg);
         // minuit.mnexcm("MINOS", arglist, 1, ierflg);
+
+        cout << "-------------------------------------------------------------" << endl;
+        cout << endl;
+        cout << "-------------------------------------------------------------" << endl;
+        minuit.mnprin(1, arglist[0]);
+        cout << "-------------------------------------------------------------" << endl;
+        cout << endl;
 
         double coup[4][4], err;
         minuit.GetParameter(3, coup[1][1], err);
@@ -182,15 +197,15 @@ int main(int argc, char* argv[])
         minuit.GetParameter(2, alph[2], err3);
 
         cout << "-------------------------------------------------------------" << endl;
-        cout << "BEST FIT TRAJECTORY PARAMETERS: "<< endl;
+        cout << " BEST FIT TRAJECTORY PARAMETERS: "<< endl;
         cout << setw(10) << "alpha_0" << setw(20) << alph[0] << endl;
         cout << setw(10) << "alpha_p" << setw(20) << alph[1] << endl;
         cout << setw(10) << "width" << setw(20) << alph[2] << endl;
         cout << "-------------------------------------------------------------" << endl;
         cout << endl;
         cout << "-------------------------------------------------------------" << endl;
-        cout << "Printing coupling constant matrix to ./output/couplings.dat" << endl;
-        cout << "Plotting best fit Isospin-" << ISOCHOICE << " amplitude to ./output/fit.data" << endl;
+        cout << " Printing coupling constant matrix to ./output/couplings.dat" << endl;
+        cout << " Plotting best fit Isospin-" << ISOCHOICE << " amplitude to ./output/fit.data" << endl;
         cout << "-------------------------------------------------------------" << endl;
 
         ofstream fit;
@@ -198,23 +213,28 @@ int main(int argc, char* argv[])
         for (int i = 0; i < np; i++)
         {
                 s = sthPi + step*double(i);
-                cd amp = VENEZ_isospin_amp(ISOCHOICE, coup, alph, s, 1.);
+                cd amp = VENEZ_iso_amp(ISOCHOICE, coup, alph, s, 1.);
                 fit << left << setw(30) << s << setw(30) << real(amp)  << setw(30) << imag(amp) << endl;
         }
         fit.close();
+
         ofstream couple;
         couple.open("./output/couplings.dat");
+        couple << left << setw(20) << alph[0] << setw(20) << alph[1] << setw(20) << alph[2] << endl;
         for (int i = 1; i < 4; i++)
         {
-                for (int j = 1; j < 4; j++)
+                for (int j = 1; j < i+1; j++)
                 {
                         couple << left << setw(20) << i << setw(20) << j <<setw(20) << coup[i][j] << endl;
                 }
         }
         couple.close();
 
-        system("gnuplot ./src/gnuplot/graph.gnu");
-        system("okular ./output/fit.pdf");
+        if (plot > 0)
+        {
+                system("gnuplot ./src/gnuplot/graph.gnu");
+                system("okular ./output/fit.pdf");
+        }
 
         return 0;
 }

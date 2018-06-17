@@ -4,11 +4,13 @@
 //
 // Author:       Daniel Winney (2018)
 // Affiliation:  Joint Physics Analysis Center (JPAC)
-// Email:        dwinney@giu.edu
+// Email:        dwinney@iu.edu
 // ---------------------------------------------------------------------------
 
 //TODO: Uncouple from big header.
 #include  "veneziano.h"
+
+double mres;
 
 //TODO: Figure out how to get rid of global variables.
 //TODO: Add Error Message if n > maxN.
@@ -18,27 +20,29 @@
 //          coup - couplings matrix a_n,i
 //          alph - Regge trajectory parameters
 //          s, t, u - Mandelstam Variables
-complex<double> VENEZ_isospin_amp(int iso, double coup[][maxN+1], double alph[], double s, double z)
+complex<double> VENEZ_iso_amp(int iso, double ** coup, double alph[], double s, double z)
 {
-        double couplings[6], n_coup[maxN+1];
+        double n_coup[maxN+1];
         complex<double> amp = 0.;
         double t, u;
 
         t = t_man(s, z); u = u_man(s, z);
-
-        for (int n = 0; n < maxN + 1; n++)
+        for (int n = 1; n < maxN+1; n++)
         {
-                for (int i = 0; i < maxN+1; i++)
+                for (int i = 1; i < maxN+1; i++)
                 {
                         n_coup[i] = coup[n][i];
                 }
-                // cout << n_coup[0] << " " << n_coup[1] << " " << n_coup[2] << " " << n_coup[3] << endl;
+                // cout << n_coup[1] << " " << n_coup[2] << " " << n_coup[3] << endl;
                 switch (iso) {
-                case 0: amp += n_amp(n, alph, n_coup, t, u) - 3. *(n_amp(n, alph, n_coup, s, u) + n_amp(n, alph, n_coup, s, t));
+                case 0: mres = .500; //f0(500)
+                        amp += n_amp(n, alph, n_coup, t, u) - 3. *(n_amp(n, alph, n_coup, s, u) + n_amp(n, alph, n_coup, s, t));
                         break;
-                case 1: amp += 2.* (n_amp(n, alph, n_coup, s, u) - n_amp(n, alph, n_coup, s, t));
+                case 1: mres = 0.770; //rho
+                        amp += 2.* (n_amp(n, alph, n_coup, s, u) - n_amp(n, alph, n_coup, s, t));
                         break;
-                case 2: amp += -2.*n_amp(n, alph, n_coup, t, u);
+                case 2: mres = 0.770; //rho
+                        amp += -2. * n_amp(n, alph, n_coup, t, u);
                         break;
                 default: cout << "Isospin " << iso << " not allowed (only 0, 1, or 2). Quiting..." << endl;
                         exit(1);
@@ -95,7 +99,7 @@ double legendre(int l, double x)
 // iso - isospin projection ( iso = 1, 2, 3)
 // coup - a_n,i matrix of couplings
 // alph - regge trajectory parameters
-complex<double> VENEZ_partial_wave(int l, int iso, double coup[][maxN+1], double alph[], double s)
+complex<double> VENEZ_partial_wave(int l, int iso, double ** coup, double alph[], double s)
 {
         double Pl, z;
         double weights[INTP], abscissas[INTP];
@@ -109,24 +113,24 @@ complex<double> VENEZ_partial_wave(int l, int iso, double coup[][maxN+1], double
         {
                 z = abscissas[i];
                 Pl = legendre(l, z);
-                sum += weights[i]*Pl*VENEZ_isospin_amp(iso, coup, alph, s, z);
+                sum += weights[i]*Pl*VENEZ_iso_amp(iso, coup, alph, s, z);
         }
         return .5*sum;
 }
 
-complex<double> VENEZ_amplitude(double coup[][maxN+1], double alph[], double s, double z)
+complex<double> VENEZ_amplitude(double ** coup, double alph[], double s, double z)
 {
         double clebcsh[3] = {.33333, .5, 1.6666};
         complex<double> amp;
 
         for (int i = 0; i < 3; i++)
         {
-                amp += clebcsh[i] * VENEZ_isospin_amp(i, coup, alph, s, z);
+                amp += clebcsh[i] * VENEZ_iso_amp(i, coup, alph, s, z);
         }
         return amp;
 }
 
-double VENEZ_cross_section(double coup[][maxN+1], double alph[], double s)
+double VENEZ_cross_section(double ** coup, double alph[], double s)
 {
         double k = elastic_mom(s, sthPi);
         complex<double> amp = VENEZ_amplitude(coup, alph, s, 1.);

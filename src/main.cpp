@@ -1,76 +1,139 @@
+
+// Main program, parses user inputs to fit and/or plot functions.
+//
+// Author:       Daniel Winney (2018)
+// Affiliation:  Joint Physics Analysis Center (JPAC)
+// Email:        dwinney@iu.edu
+// ---------------------------------------------------------------------------
+
 #include "veneziano.h"
 
-int main()
+int isochoice;
+
+int WaveTranslate(string OPTION)
 {
-        //couplings from file
-        double a[maxN+1][maxN+1]; //couplings matrix
-        // int num = 0;
-        //
-        // for (int c = 0; c < maxN + 1; c++)
-        // {
-        //         num += c;
-        // }
-        // int n[num], i[num];
-        // double ani[num];
-        //
-        // ifstream couplings;
-        // // string filename = "couplings";
-        // string line;
-        // couplings.open("couplings.txt");
-        // if(couplings.fail()) // checks to see if file opended
-        // {
-        //         cout << "Couldn't open couplings.txt" << endl;
-        //         return 1; // no point continuing if the file didn't open...
-        // }
-        // for (int ii = 0; ii < num; ii++)
-        // {
-        //         couplings >> n[ii];
-        //         couplings >> i[ii];
-        //         couplings >> ani[ii];
-        //         a[n[ii]][i[ii]] = ani[ii];
-        // }
-        // couplings.close();
-        for (int c = 0; c < 4; c++)
+        int wave;
+        if (OPTION == "S0") {wave = 0;}
+        else if (OPTION == "S2") {wave = 02;}
+        else if (OPTION == "P1") {wave = 11;}
+        else if (OPTION == "D0") {wave = 20;}
+        else if (OPTION == "D2") {wave = 22;}
+        else if (OPTION == "F1") {wave = 31;}
+        else {cout << "Invalid Partial Wave " << OPTION << ". Quitting..." << endl; cout << endl; exit(1);}
+        return wave;
+}
+
+int main(int argc, char* argv[])
+{
+        cout << " " << endl; // Line break to make terminal look pretty :)
+        int print = -1;
+        int plot = -1;
+        string MODEL, AMP, OPTION, OPTION2;
+
+        //Before anything check for plot
+        for (int i = 0; i < argc; i++)
         {
-                for(int b = 0; b < 4; b++)
+                if (strcmp(argv[i], "-plot")==0) plot = 1;
+        }
+
+        for (int ii = 0; ii < argc; ii++)
+        {
+                if (strcmp(argv[ii], "print")==0)
                 {
-                        a[c][b] = 0.;
+                        if (argc <  4)
+                        {
+                                cout << "Not enough arguments for plot, check README. Quitting..." << endl;
+                                cout << endl;
+                                exit(1);
+                        }
+                        print = 1;
+                        MODEL = argv[ii+1]; //GKPY or VENEZ
+                        AMP = argv[ii+2]; //isospin, partial, total
+                        if (argc > 4)
+                        {
+                                OPTION = argv[ii+3]; //wave
+                        }
+                        if (argc > 5)
+                        {
+                                OPTION2 = argv[ii+4]; //coupling inputfilename
+                        }
+                        break;
                 }
         }
-        a[1][1] = 11.;
-        a[2][1] = 21.;
-        a[2][2] = 22.;
-        a[3][1] = 31.;
-        a[3][2] = 32.;
-        a[3][3] = 33.;
 
-        double alph[2] = {.3, .9};
-
-        double s;
-        cd amp;
-
-        ofstream pwave;
-        pwave.open("./output/rho.dat");
-        pwave << left << setw(30) << "#s" << setw(30) << "Re[Amp]" << setw(30) << "Im[Amp]" << endl;
-        for (int i = 0; i < 201; i++)
+        if (print > 0)
         {
-                s = sthPi + .01*double(i);
+                string OUTPUT;
+                OUTPUT = "./output/" + MODEL + "-" + AMP + "-" + OPTION;
+                int CASE;
+                if (MODEL == "GKPY")
+                {
 
-                amp = VENEZ_isospin_amp(1, a, alph, s, 1. );
-
-                pwave << left << setw(30) << s << setw(30) << real(amp)  << setw(30) << imag(amp) << endl;
+                        if (AMP == "isospin")
+                        {
+                                CASE = 1;
+                        }
+                        else if (AMP == "total")
+                        {
+                                CASE = 2;
+                        }
+                        else if (AMP == "phaseshift")
+                        {
+                                CASE = 3;
+                        }
+                        else if (AMP == "partial")
+                        {
+                                CASE = 4;
+                        }
+                        else
+                        {
+                                cout << " Invalid option for GKPY parameterization. Quitting..." << endl;
+                                cout << endl;
+                                exit(1);
+                        }
+                        plotGKPY(CASE, plot, OPTION, OUTPUT);
+                }
+                else if (MODEL == "VENEZ")
+                {
+                        if (AMP == "isospin")
+                        {
+                                CASE = 1;
+                        }
+                        if (AMP == "total")
+                        {
+                                CASE = 2;
+                                OPTION2 = OPTION;
+                        }
+                        else if (AMP == "partial")
+                        {
+                                CASE = 3;
+                        }
+                        else
+                        {
+                                cout << " Invalid option for VENEZ parameterization. Quitting..." << endl;
+                                cout << endl;
+                                exit(1);
+                        }
+                        plotVENEZ(CASE, plot, OPTION, OPTION2, OUTPUT);
+                }
+                else
+                {
+                        cout << "Invalid MODEL chosen. Quiting..." << endl;
+                        cout << endl;
+                        exit(1);
+                }
+                //TODO: Use ROOT to plot stuff...
+                // if (plot > 0)
+                // {
+                //         string temp = "gnuplot -p -e \"plot " + OUTPUT +"\" u 1:2 w l";
+                //         system(temp.c_str());
+                // }
         }
-        pwave.close();
-        system("gnuplot ./src/gnuplot/graph.gnu");
-        system("okular ./output/rho.pdf");
-
-        // for (int i = 0; i < 11; i++)
-        // {
-        // s = 0. + .2*double(i);
-        // t = t_man(s, 1.);
-        // u = u_man(s, 1.);
-        // cout << n_amp(1, alph, a[1], s, t) << endl;
-        // }
-
-        return 0;
+        else
+        {
+                cout << "Invalid commands entered. See README. Quitting..." << endl;
+                cout << endl;
+                exit(1);
+        }
+        return 6;
 }

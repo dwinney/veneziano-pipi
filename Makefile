@@ -10,28 +10,29 @@ vpath %.cpp src
 vpath %.h src
 vpath %.o src/obj
 
-mains 		=	$(addprefix $(OBJ_DIR)/, main.o GKPRY.o)
-objects 	= $(addprefix $(OBJ_DIR)/, pipi-amp.o venez-amp.o cgamma.o gauleg.o GKPRY-eq.o)
+mains 		=	$(addprefix $(OBJ_DIR)/, fitting.o)
+objects 	= $(addprefix $(OBJ_DIR)/, main.o pipi-amp.o venez-amp.o cgamma.o gauleg.o GKPRY.o)
 directories	 = ./src/obj ./output
 
-$(objects)	  : 	$(OBJ_DIR)/%.o :  %.cpp veneziano.h
-						g++ -c $< -o $@
+pipi		 :	$(directories)	$(objects) $(OBJ_DIR)/plotting.o
+					$(LD) -o pipi $(objects) $(OBJ_DIR)/plotting.o $(LDFLAGS)
 
-$(mains) 			:		$(OBJ_DIR)/%.o	 : 	%.cpp veneziano.h $(objects)
+$(OBJ_DIR)/veneziano.h.gch : veneziano.h
+						g++ -o $@ -c $<
+
+$(OBJ_DIR)/plotting.o : plotting.cpp $(OBJ_DIR)/veneziano.h.gch
+						$(CXX) $(CPPFLAGS) -o $@ -c $<
+
+$(objects)	  : 	$(OBJ_DIR)/%.o :  %.cpp $(OBJ_DIR)/veneziano.h.gch
 						g++ -c $< -o $@
 
 $(directories) :
 						@echo "Creating folder: $@" && \
     				mkdir -p $@
 
-$(OBJ_DIR)/fitting.o	: fitting.cpp veneziano.h
+$(mains)	: $(OBJ_DIR)/%.o : %.cpp $(OBJ_DIR)/veneziano.h.gch
 							$(CXX) $(CPPFLAGS) -o $@ -c $<
 
-rho 					 : 	$(directories)	$(objects) $(OBJ_DIR)/main.o
-				g++ -o rho $(objects) $(OBJ_DIR)/main.o
-
-GKPRY		 :	$(directories)	$(objects) $(OBJ_DIR)/GKPRY.o
-				g++ -o GKPRY $(objects) $(OBJ_DIR)/GKPRY.o
 
 fit				: $(directories)	$(objects) $(OBJ_DIR)/fitting.o
 						$(LD) -o fit $(objects) $(OBJ_DIR)/fitting.o $(LDFLAGS)
@@ -40,13 +41,13 @@ fit				: $(directories)	$(objects) $(OBJ_DIR)/fitting.o
 .PHONY		 : clean clean-out spotless clean-exe
 
 spotless	 :
-						rm -rf ./output ./src/obj rho GKPRY fit
+						rm -rf ./output ./src/obj fit pipi
 
 clean 		 :
 						clean-exe clean-out
 
 clean-exe	 :
-						rm -rf rho GKPRY fit ./src/obj
+						rm -rf fit pipi fit ./src/obj
 
 clean-out	 :
 						rm -rf ./output
