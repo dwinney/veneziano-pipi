@@ -37,7 +37,7 @@ const cd xi(0., 1.);
 
 #define backN   10.*xr  //Background N, just needs to be "large enough"
 #define maxN    3       //Truncated maximum n
-#define INTP    500     //Number of points for numerical integration
+#define INTP    100     //Number of points for numerical integration
 
 //amp.cpp
 cd rtraj(double alph[], double s);

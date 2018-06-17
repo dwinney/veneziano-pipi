@@ -113,7 +113,7 @@ complex<double> VENEZ_partial_wave(int l, int iso, double ** coup, double alph[]
         {
                 z = abscissas[i];
                 Pl = legendre(l, z);
-                sum += weights[i]*Pl*VENEZ_iso_amp(iso, coup, alph, s, z);
+                sum += weights[i] * Pl * VENEZ_iso_amp(iso, coup, alph, s, z);
         }
         return .5*sum;
 }
