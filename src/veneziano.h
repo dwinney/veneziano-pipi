@@ -73,6 +73,7 @@ int WaveTranslate(string OPTION);
 void plotGKPY(int CASE, int plot, string OPTION, string OUTPUT);
 void getCOUPLING(string INPUT, double ** output);
 void plotVENEZ(int MODE, int plot, string OPTION, string INPUT, string OUTPUT);
+void plotFILE(string INPUT, string OUTPUT);
 
 extern double s_dat[], re_dat[], im_dat[];
 extern int ISOCHOICE;

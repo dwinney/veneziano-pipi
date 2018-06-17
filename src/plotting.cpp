@@ -1,3 +1,13 @@
+
+// Contains Secondary functions used when plotting amplitudes, uses ROOT to plot
+// (formerly gnuplot). Funtionality for GKPY and VENEZ models.
+// Also can plot a generic amplitude (three columns: s, real, imag) from FILE.
+//
+// Author:       Daniel Winney (2018)
+// Affiliation:  Joint Physics Analysis Center (JPAC)
+// Email:        dwinney@iu.edu
+// ---------------------------------------------------------------------------
+
 #include "veneziano.h"
 
 #include <TGraph.h>
@@ -7,6 +17,7 @@
 #include <TLegend.h>
 #include <TError.h>
 
+//If MODEL = GKPY
 void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
 {
         setprecision(17);
@@ -55,14 +66,14 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
                 {
                         amp = GKPRY_iso_amp(wave, s[i], 1.);
                         amp_re[i] = real(amp); amp_im[i] = imag(amp);
-                        gkpry << setw(30) << amp_re[i] << setw(30) << amp_re[i] << endl;
+                        gkpry << setw(30) << amp_re[i] << setw(30) << amp_im[i] << endl;
                         break;
                 }
                 case 2: //total amplitude
                 {
                         amp = GKPRY_amplitude(s[i], 1.);
                         amp_re[i] = real(amp); amp_im[i] = imag(amp);
-                        gkpry << setw(30) << amp_re[i] << setw(30) << amp_re[i] << endl;
+                        gkpry << setw(30) << amp_re[i] << setw(30) << amp_im[i] << endl;
                         break;
                 }
                 case 3: //phaseshifts and inelasticities
@@ -126,7 +137,7 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
                         cout << " Output to " << PDF << endl;
                         cout << endl;
                 }
-                else if (MODE == 3)
+                else if (MODE == 3) //Special plotting instructions for inelastivities and phaseshifts
                 {
                         gErrorIgnoreLevel = kWarning;
                         string PDF1 = "./output/GKPY-inelasticity-" + OPTION + "-PLOT.pdf";
@@ -165,6 +176,7 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
         }
 }
 
+//VENEZIANO model
 void plotVENEZ(int MODE, int plot, string OPTION, string INPUT, string OUTPUT)
 {
         setprecision(17);
@@ -280,6 +292,73 @@ void plotVENEZ(int MODE, int plot, string OPTION, string INPUT, string OUTPUT)
         }
 }
 
+//Plot from FILE. Requries three columns for an amplitude.
+void plotFILE(string INPUT, string OUTPUT)
+{
+        setprecision(17);
+        double s[10000], amp_re[10000], amp_im[10000];
+        int i = 0;
+
+        ifstream infile;
+        infile.open(INPUT.c_str());
+        if (infile.fail())
+        {
+                cout << " Could not open " << INPUT << ". Quitting..." << endl;
+                cout << endl;
+                exit(1);
+        }
+        else
+        {
+                cout << " Reading data from file:" << endl;
+                cout << " " << INPUT << endl;
+                cout << endl;
+
+                while(!infile.eof())
+                {
+                        infile >> s[i];
+                        infile >> amp_re[i];
+                        infile >> amp_im[i];
+                        i++;
+                }
+                i -= 1;
+        }
+        infile.close();
+
+        cout << " Plotting..." << endl;
+
+        gErrorIgnoreLevel = kWarning;
+
+        TCanvas * c1 = new TCanvas("c1",":)",200,10,700,500);
+        TMultiGraph * mg = new TMultiGraph();
+
+        TGraph * real = new TGraph(i, s, amp_re);
+        real->SetLineColor(2);
+        real->SetName("real");
+        real->SetLineWidth(4);
+
+        TGraph * imag = new TGraph(i, s, amp_im);
+        imag->SetLineColor(4);
+        imag->SetName("imag");
+        imag->SetLineWidth(4);
+
+        mg->Add(real);
+        mg->Add(imag);
+        mg->Draw("AL");
+
+        // TLegend* l = new TLegend(.1,0.77,0.27,0.9);
+        // l->AddEntry("real","Real","l");
+        // l->AddEntry("imag","Imaginary","l");
+        // l->Draw();
+        c1->Print(OUTPUT.c_str());
+
+        // c1->Modified();
+        // c1->Update();
+
+        cout << " Output to " << OUTPUT << endl;
+        cout << endl;
+}
+
+//Converts string of spectroscopic name of partial wave to an INT
 int WaveTranslate(string OPTION)
 {
         int wave;
@@ -303,6 +382,7 @@ void getCOUPLING(string INPUT, double ** output)
         if (coupling.fail())
         {
                 cout << "Could not open " << INPUT << ". Quitting..." << endl;
+                cout << endl;
                 exit(1);
         }
         else
@@ -328,5 +408,6 @@ void getCOUPLING(string INPUT, double ** output)
                 cout << " " << INPUT << endl;
                 cout << endl;
         }
+        coupling.close();
 
 }

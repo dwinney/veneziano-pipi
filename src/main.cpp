@@ -8,8 +8,6 @@
 
 #include "veneziano.h"
 
-int isochoice;
-
 int main(int argc, char* argv[])
 {
         cout << " " << endl; // Line break to make terminal look pretty :)
@@ -41,6 +39,7 @@ int main(int argc, char* argv[])
                 }
         }
 
+        //PLOTTING
         if (plot > 0)
         {
                 string OUTPUT;
@@ -75,7 +74,6 @@ int main(int argc, char* argv[])
                 }
                 else if (MODEL == "VENEZ")
                 {
-                        // cout << AMP << endl;
                         if (AMP == "isospin")
                         {
                                 CASE = 1;
@@ -98,6 +96,12 @@ int main(int argc, char* argv[])
                         }
                         plotVENEZ(CASE, plot, OPTION, OPTION2, OUTPUT);
 
+                }
+                else if (MODEL == "FILE")
+                {
+                        if (OPTION == "") OPTION = "./output/FILE-DEFAULT-NAME-PLOT.pdf";
+                        else OPTION = "./output/" + OPTION + ".pdf";
+                        plotFILE(AMP, OPTION);
                 }
                 else
                 {

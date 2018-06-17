@@ -1,4 +1,6 @@
-// Contains functions related specifically to pi-pi scattering.
+
+// Contains functions related specifically to VENEZ model applied to
+// pi-pi scattering.
 //
 // Dependencies: venez-amp.cpp, cgamma.cpp
 //
