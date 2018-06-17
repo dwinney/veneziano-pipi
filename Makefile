@@ -11,7 +11,7 @@ vpath %.h src
 vpath %.o src/obj
 
 mains 		=	$(addprefix $(OBJ_DIR)/, fitting.o)
-objects 	= $(addprefix $(OBJ_DIR)/, main.o pipi-amp.o venez-amp.o cgamma.o gauleg.o GKPRY.o)
+objects 	= $(addprefix $(OBJ_DIR)/, main.o VENEZ.o math.o GKPRY.o)
 directories	 = ./src/obj ./output
 
 pipi		 :	$(directories)	$(objects) $(OBJ_DIR)/plotting.o
@@ -20,7 +20,7 @@ pipi		 :	$(directories)	$(objects) $(OBJ_DIR)/plotting.o
 $(OBJ_DIR)/pipi.h.gch : pipi.h
 						g++ -o $@ -c $<
 
-$(OBJ_DIR)/plotting.o : plotting.cpp $(OBJ_DIR)/pipi.gch
+$(OBJ_DIR)/plotting.o : plotting.cpp $(OBJ_DIR)/pipi.h.gch
 						$(CXX) $(CPPFLAGS) -o $@ -c $<
 
 $(objects)	  : 	$(OBJ_DIR)/%.o :  %.cpp $(OBJ_DIR)/pipi.h.gch

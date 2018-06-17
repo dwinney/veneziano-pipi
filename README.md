@@ -2,7 +2,7 @@
 
 Toolkit for plotting and fitting pion-pion scattering amplitudes.
 
-To install and use features in the core program simply clone and/or unpack and in main directory use 'make'.
+To install and use features in the core program simply clone and/or unpack and in main directory use ``make``.
 
 Requires a working distribution of ROOT to both compile and use. Tested only with ROOT 6.12.06.
 
@@ -24,7 +24,7 @@ For ``GKPY`` available amplitudes include :
  * ``partial (WAVE)`` - Produces desired partial-wave with definite angular momentum and isospin. The ``(WAVE)`` option should be input using the usual spectroscopic notation (S0, S2, P1, D0, D2, or F1).
  * ``phaseshift (WAVE)`` - Special to the GKPY parameterization, produces the phase shifts and inelasticities for a specified partial wave.
 
-For ``VENEZ`` all amplitudes include a text file containing the coupling constants and linear Regge trajectory parameters denoted by ``(INPUT)`` which should be given as a relative path from the main directory.
+For ``VENEZ`` all amplitudes require a text file containing the coupling constants and linear Regge trajectory parameters denoted by ``(INPUT)`` which should be given as a relative path from the main directory.
  * ``isospin (0, 1 ,2) (INPUT)``- same as above.
  * ``total (INPUT)`` - self explanatory.
  * ``partial (WAVE) (INPUT)`` - note here as well ``(WAVE)`` should be a char string with spectroscopic notation.
@@ -35,7 +35,7 @@ To use: ``./pipi FILE (PATH TO FILE) (OUTPUT FILE NAME)``.
 ###### EXAMPLE
 To produce the P1-wave Veneziano partial wave from couplings in ./example_coup.dat:
 ```
-./pipi VENEZ partial P1 ./example_cout.dat 
+./pipi VENEZ partial P1 ./example_cout.dat
 ```
 
 #### FITTING

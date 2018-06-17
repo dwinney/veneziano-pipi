@@ -7,7 +7,7 @@
 // ---------------------------------------------------------------------------
 
 //TODO: Uncouple from big header.
-#include "veneziano.h"
+#include "pipi.h"
 
 
 // Produces the Phase-shift for given Partial Wave as function of s.
