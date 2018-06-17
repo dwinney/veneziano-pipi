@@ -17,20 +17,20 @@ directories	 = ./src/obj ./output
 pipi		 :	$(directories)	$(objects) $(OBJ_DIR)/plotting.o
 					$(LD) -o pipi $(objects) $(OBJ_DIR)/plotting.o $(LDFLAGS)
 
-$(OBJ_DIR)/veneziano.h.gch : veneziano.h
+$(OBJ_DIR)/pipi.h.gch : pipi.h
 						g++ -o $@ -c $<
 
-$(OBJ_DIR)/plotting.o : plotting.cpp $(OBJ_DIR)/veneziano.h.gch
+$(OBJ_DIR)/plotting.o : plotting.cpp $(OBJ_DIR)/pipi.gch
 						$(CXX) $(CPPFLAGS) -o $@ -c $<
 
-$(objects)	  : 	$(OBJ_DIR)/%.o :  %.cpp $(OBJ_DIR)/veneziano.h.gch
+$(objects)	  : 	$(OBJ_DIR)/%.o :  %.cpp $(OBJ_DIR)/pipi.h.gch
 						g++ -c $< -o $@
 
 $(directories) :
 						@echo "Creating folder: $@" && \
     				mkdir -p $@
 
-$(mains)	: $(OBJ_DIR)/%.o : %.cpp $(OBJ_DIR)/veneziano.h.gch
+$(mains)	: $(OBJ_DIR)/%.o : %.cpp $(OBJ_DIR)/pipi.h.gch
 							$(CXX) $(CPPFLAGS) -o $@ -c $<
 
 
