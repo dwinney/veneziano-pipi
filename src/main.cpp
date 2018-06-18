@@ -11,7 +11,7 @@
 int main(int argc, char* argv[])
 {
         cout << " " << endl; // Line break to make terminal look pretty :)
-        int plot = -1;
+        int plot = -1; int fit = -1;
         string MODEL, AMP, OPTION, OPTION2;
 
         for (int ii = 0; ii < argc; ii++)
@@ -36,6 +36,23 @@ int main(int argc, char* argv[])
                                 OPTION2 = argv[ii+4]; //coupling inputfilename
                         }
                         break;
+                }
+                if (strcmp(argv[ii], "fit")==0)
+                {
+                        fit = 1;
+                        if (argc < 5)
+                        {
+                                cout << " Not enough arguments for fit, check README. Quiting..." << endl;
+                                cout << endl;
+                                exit(1);
+                        }
+                        else
+                        {
+                                MODEL = argv[ii+1]; // VENEZ
+                                AMP = argv[ii+2];
+                                OPTION = argv[ii+3]; //wave
+                                OPTION2 = argv[ii+4];   //file to fit
+                        }
                 }
         }
 
@@ -102,6 +119,30 @@ int main(int argc, char* argv[])
                         if (OPTION == "") OPTION = "./output/FILE-DEFAULT-NAME-PLOT.pdf";
                         else OPTION = "./output/" + OPTION + ".pdf";
                         plotFILE(AMP, OPTION);
+                }
+                else
+                {
+                        cout << "Invalid MODEL chosen. Quiting..." << endl;
+                        cout << endl;
+                        exit(1);
+                }
+        }
+        else if (fit > 0)
+        {
+                if (MODEL == "VENEZ")
+                {
+                        string OUTPUT;
+                        OUTPUT = "./output/" + MODEL + "-" + AMP + "-" + OPTION;
+                        int MODE = -600;
+                        if (AMP == "partial")
+                        {
+                                MODE = 1;
+                        }
+                        else if (AMP == "isospin")
+                        {
+                                MODE = 2;
+                        }
+                        fitVENEZ(MODE, OPTION, OPTION2, OUTPUT);
                 }
                 else
                 {

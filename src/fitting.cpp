@@ -1,151 +1,138 @@
 #include "pipi.h"
-
 #include <TFitter.h>
 #include <TMinuit.h>
 #include <TROOT.h>
 #include <TMath.h>
 
-double s_dat[1000], re_dat[1000], im_dat[1000];
-int ISOCHOICE;
+double s_dat[10000], re_dat[10000], im_dat[10000];
+int NPOINTS, wave;
+int MODE = -600;
 
-//Function to import amplitude data to be fit from file.
-//Three columns s values, real part, imaginary part
-//TODO: have general fit file name
-void get_Data()
+int getDATA(string INPUT)
 {
-        string filename = "./output/data.dat";
-        ifstream infile(filename.c_str());
-        if (infile.fail())
+        int NPOINTS = 0;
+        ifstream data(INPUT.c_str());
+        if (data.fail())
         {
-                cout << " Couldn't open data file. Quiting..." << endl;
+                cout << " Could not open INPUT file. Quitting..." << endl;
+                cout << endl;
                 exit(1);
         }
-        else{
-                int n = 0;
-                while (!infile.eof())
+        else
+        {
+                cout << " Reading data from " + INPUT << endl;
+                while (!data.eof())
                 {
-                        infile >> s_dat[n];
-                        infile >> re_dat[n];
-                        infile >> im_dat[n];
-                        n++;
+                        data >> s_dat[NPOINTS];
+                        data >> re_dat[NPOINTS];
+                        data >> im_dat[NPOINTS];
+                        NPOINTS++;
                 }
-                cout << " Imported data from: " << filename << endl;
-
+                cout << " Imported " << NPOINTS - 1 << " data points." << endl;
+                cout << endl;
         }
+        return NPOINTS;
 }
 
-//chi-square of the amplitude of given isospin to data.
-//fits both real and imaginary parts simultaneously.
-double chi_square(double coup[][maxN+1], double alph[])
+
+double chi_square(double ** coup, double alph[])
 {
         double chi = 0.;
         double s, error;
         complex<double> VENEZ;
 
-        error = 10.0;
+        error = 1.0;
 
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < NPOINTS - 1; i++)
         {
                 s = s_dat[i];
-                VENEZ = VENEZ_iso_amp(ISOCHOICE, coup, alph, s, 1.);
-                chi += pow(((re_dat[i] - real(VENEZ)) / error), 2.);
-                chi += pow(((im_dat[i] - imag(VENEZ)) / error), 2.);
+                complex<double> data(re_dat[i], im_dat[i]);
+                if (MODE == 1)
+                {
+                        int iso = wave % 10;
+                        int l = wave / 10;
+                        VENEZ = VENEZ_partial_wave(l, iso, coup, alph, s);
+                }
+                else if (MODE == 2)
+                {
+                        VENEZ = VENEZ_iso_amp(wave, coup, alph, s, 1.);
+                }
+                else
+                {
+                        cout << " Invalid AMP selected. Qutting..." << endl;
+                        cout << endl; exit(1);
+                }
+                chi += real((data - VENEZ) * conj(data - VENEZ)) / (error*error);
         }
+        // cout << setw(20) << chi << endl;
         return chi;
 }
 
-//Wrapper function to
 static void WRAPPER(int& npar, double* g, double& result, double *par, int flag)
 {
-        double coup[4][4];
-        coup[1][1] = par[3];
-        coup[2][1] = par[4];
-        coup[2][2] = par[5];
-        coup[3][1] = par[6];
-        coup[3][2] = par[7];
-        coup[3][3] = par[8];
+        double **a_matrix;
+        a_matrix = new double *[maxN+1];
+        for (int i = 0; i < maxN+1; i++) a_matrix[i] = new double[maxN+1];
+
+        a_matrix[1][1] = par[3];
+        a_matrix[2][1] = par[4];
+        a_matrix[2][2] = par[5];
+        a_matrix[3][1] = par[6];
+        a_matrix[3][2] = par[7];
+        a_matrix[3][3] = par[8];
 
         double alph [3];
         alph[0] = par[0];
         alph[1] = par[1];
         alph[2] = par[2];
 
-        result = chi_square(coup, alph);
+        result = chi_square(a_matrix, alph);
         // cout << result << endl;
 }
 
-int main(int argc, char* argv[])
+void fitVENEZ(int CASE, string OPTION, string INPUT, string OUTPUT)
 {
-        cout << endl;
-        setprecision(10);
-        int np = 100;
-        int iso = 600;
-        int plot = -1;
-        for (int ii = 0; ii < argc; ii++)
+        setprecision(17);
+        NPOINTS = getDATA(INPUT);
+        MODE = CASE;
+        if (MODE == 1)
         {
-                if (strcmp(argv[ii],"-i")==0) iso = atof(argv[ii+1]);
-                if (strcmp(argv[ii], "-plot")==0) plot = 1;
-                // if (strcmp(argv[ii], "-n")==0) np = atoi(argv[ii+1]);
+                wave = WaveTranslate(OPTION);
+        }
+        else if (MODE == 2)
+        {
+                wave = atoi(OPTION.c_str());
         }
 
-        if (iso > 2)
-        { cout << " Input valid Isospin to fit [-i isospin]. Quitting..." << endl;
-          exit(1);}
-
-        ISOCHOICE = iso;
-        double s;
-        double smax, step;
-        complex<double> amp;
-
-        smax = pow(1.42, 2.);
-        step = (smax - sthPi) / double(np);         //get stepsize
-
-        cout << "-------------------------------------------------------------" << endl;
-        cout << " Printing Isospin-" << ISOCHOICE << " GKPY amplitude to ./output/data.dat" << endl;
-        cout << " Using " << np << " data points. Step size = " << step << " GeV^2" << endl;
-
-        ofstream data;
-        data.open("./output/data.dat");
-        for (int i = 0; i < np; i++)
-        {
-                s = sthPi + 1e-8 + step*double(i);
-                amp = GKPRY_iso_amp(ISOCHOICE, s, 1.);
-                data << left << setw(30) << s << setw(30) << real(amp) << setw(30) << imag(amp) << endl;
-        }
-        data.close();
-
-        get_Data();
-        cout << "-------------------------------------------------------------" << endl;
+        cout << " Starting TMinuit..." << endl;
         cout << endl;
-        cout << "-------------------------------------------------------------" << endl;
         TMinuit minuit(9);
         minuit.SetFCN(WRAPPER);
 
         double start[3], stepsiz[4], min[4], max[4];
 
         //alpha_0
-        start[0] = .2; stepsiz[0] = 0.1;
-        min[0] = 0.; max[0] = 1.5;
+        start[0] = 1.; stepsiz[0] = 0.01;
+        min[0] = 0.; max[0] = 0.;
         //alpha^p
-        start[1] = 0.75; stepsiz[1] = 0.1;
-        min[1] = 0.5; max[1] = 1.5;
+        start[1] = 0.928524; stepsiz[1] = 0.1;
+        min[1] = 0.; max[1] = 0.;
         //width
-        start[2] = .164; stepsiz[2] = .05;
+        start[2] = .145; stepsiz[2] = .01;
         min[2] = 0.0; max[2] = 1.;
         //couplings
-        start[3] = 0.; stepsiz[3] = 2.;
-        min[3] = -0.; max[3] = -0.;
-
+        start[3] = 0.; stepsiz[3] = .2;
+        min[3] = 0.; max[3] = 0.;
 
         double arglist[10];
         int ierflg = 0;
         minuit.mnparm(0, "alpha_0", start[0], stepsiz[0], min[0], max[0], ierflg);
         minuit.mnparm(1, "alpha_p", start[1], stepsiz[1], min[1], max[1], ierflg);
         minuit.mnparm(2, "width", start[2], stepsiz[2], min[2], max[2], ierflg);
-        minuit.mnparm(3, "a_1,1", start[3], stepsiz[3], min[3], max[3], ierflg);
-        minuit.mnparm(4, "a_2,1", start[3], stepsiz[3], min[3], max[3], ierflg);
+        minuit.mnparm(3, "a_1,1", 5., stepsiz[3], 0, 0, ierflg);
+        minuit.mnparm(4, "a_2,1", 0., stepsiz[3], -1., 1., ierflg);
         minuit.mnparm(5, "a_2,2", start[3], stepsiz[3], min[3], max[3], ierflg);
-        minuit.mnparm(6, "a_3,1", start[3], stepsiz[3], min[3], max[3], ierflg);
+        minuit.mnparm(6, "a_3,1", 0, stepsiz[3], 0, 0, ierflg);
         minuit.mnparm(7, "a_3,2", start[3], stepsiz[3], min[3], max[3], ierflg);
         minuit.mnparm(8, "a_3,3", start[3], stepsiz[3], min[3], max[3], ierflg);
 
@@ -156,31 +143,63 @@ int main(int argc, char* argv[])
         minuit.mnexcm("SET STR", arglist, 1, ierflg);
         minuit.SetErrorDef(1); //1 for chi square
 
-        // PRESERVE BOSE SYMMETRY
-        if (ISOCHOICE == 0 || ISOCHOICE == 2)
+        // minuit.FixParameter(0);
+        // minuit.FixParameter(1);
+        // minuit.FixParameter(2);
+
+        //TODO: Impose Bose symmetry
+        if (OPTION == "P1")
         {
-                minuit.FixParameter(3);
+                cout << endl;
+                cout << " Using rho(770) trajectory... " << endl;
+                // minuit.FixParameter(0);
+                // minuit.FixParameter(1);
+                // minuit.FixParameter(2);
+                cout << " Only fitting spin-1 resonances: a_1,1 a_2,1 and a3,1..." << endl;
+                cout << endl;
                 minuit.FixParameter(4);
-                minuit.FixParameter(6);
-                minuit.FixParameter(8);
-        }
-        else if (ISOCHOICE == 1)
-        {
                 minuit.FixParameter(5);
                 minuit.FixParameter(7);
+                // minuit.FixParameter(6);
+                minuit.FixParameter(8);
         }
+        else if (OPTION == "F1")
+        {
+                cout << endl;
+                cout << " Using rho(770) trajectory... " << endl;
+                minuit.FixParameter(0);
+                minuit.FixParameter(1);
+                minuit.FixParameter(2);
+                cout << "Only fitting spin-3 resonances: a3,3..." << endl;
+                cout << endl;
+                minuit.FixParameter(3);
+                minuit.FixParameter(4);
+                minuit.FixParameter(5);
+                minuit.FixParameter(6);
+                minuit.FixParameter(7);
+        }
+        else if (OPTION == "S0")
+        {
+                cout <<"I dunno wht im doing..." << endl;
+        }
+        // minuit.FixParameter(0);
+        // minuit.FixParameter(1);
+        // minuit.FixParameter(2);
+        // minuit.FixParameter(3);
+        // minuit.FixParameter(4);
+        // minuit.FixParameter(5);
+        // minuit.FixParameter(6);
+        // minuit.FixParameter(7);
+        // minuit.FixParameter(8);
 
-        arglist[0] = 1000;
+        arglist[0] = 1500;
         minuit.mnexcm("SIMPLEX", arglist,1,ierflg);
         // minuit.mnexcm("MINIMIZE", arglist, 1, ierflg);
         minuit.mnexcm("MIGRAD", arglist, 1, ierflg);
         // minuit.mnexcm("MINOS", arglist, 1, ierflg);
 
-        cout << "-------------------------------------------------------------" << endl;
         cout << endl;
-        cout << "-------------------------------------------------------------" << endl;
-        minuit.mnprin(1, arglist[0]);
-        cout << "-------------------------------------------------------------" << endl;
+        cout << " Fit done. Fetching Best-fit values..." << endl;
         cout << endl;
 
         double coup[4][4], err;
@@ -196,30 +215,27 @@ int main(int argc, char* argv[])
         minuit.GetParameter(1, alph[1], err2);
         minuit.GetParameter(2, alph[2], err3);
 
-        cout << "-------------------------------------------------------------" << endl;
         cout << " BEST FIT TRAJECTORY PARAMETERS: "<< endl;
         cout << setw(10) << "alpha_0" << setw(20) << alph[0] << endl;
         cout << setw(10) << "alpha_p" << setw(20) << alph[1] << endl;
         cout << setw(10) << "width" << setw(20) << alph[2] << endl;
-        cout << "-------------------------------------------------------------" << endl;
         cout << endl;
-        cout << "-------------------------------------------------------------" << endl;
-        cout << " Printing coupling constant matrix to ./output/couplings.dat" << endl;
-        cout << " Plotting best fit Isospin-" << ISOCHOICE << " amplitude to ./output/fit.data" << endl;
-        cout << "-------------------------------------------------------------" << endl;
 
-        ofstream fit;
-        fit.open("./output/fit.dat");
-        for (int i = 0; i < np; i++)
+        cout << " BEST FIT COUPLINGS: " << endl;
+        cout << setw(10) << "n" << setw(10) << "i" << setw(10) << "a_n,i" << endl;
+        for (int i = 1; i < 4; i++)
         {
-                s = sthPi + step*double(i);
-                cd amp = VENEZ_iso_amp(ISOCHOICE, coup, alph, s, 1.);
-                fit << left << setw(30) << s << setw(30) << real(amp)  << setw(30) << imag(amp) << endl;
+                for (int j = 1; j <= i; j++)
+                {
+                        cout << setw(10) << i << setw(10) << j << setw(10) << coup[i][j] << endl;
+                }
         }
-        fit.close();
+        cout << endl;
+        OUTPUT += "-COUPLINGS.dat";
+        cout << " Printing results.." << endl;
 
         ofstream couple;
-        couple.open("./output/couplings.dat");
+        couple.open(OUTPUT.c_str());
         couple << left << setw(20) << alph[0] << setw(20) << alph[1] << setw(20) << alph[2] << endl;
         for (int i = 1; i < 4; i++)
         {
@@ -230,11 +246,7 @@ int main(int argc, char* argv[])
         }
         couple.close();
 
-        if (plot > 0)
-        {
-                system("gnuplot ./src/gnuplot/graph.gnu");
-                system("okular ./output/fit.pdf");
-        }
+        cout << " Output to " << OUTPUT << endl;
+        cout << endl;
 
-        return 0;
 }

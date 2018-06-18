@@ -6,9 +6,15 @@
 // Email:        dwinney@iu.edu
 // ---------------------------------------------------------------------------
 
-//TODO: Uncouple from big header.
 #include "pipi.h"
 
+//Returns conformal variable given Mandelstam s and branching point s0.
+double conformal(double s, double s0)
+{
+        double numerator = sqrt(s) - sqrt(s0 - s);
+        double denominator = sqrt(s) + sqrt(s0 - s);
+        return numerator/denominator;
+}
 
 // Produces the Phase-shift for given Partial Wave as function of s.
 // Based on parameterizations from CFD Set:
@@ -437,19 +443,7 @@ double inelasticity(int l, int iso, double s)
         }
 }
 
-//Returns conformal variable given Mandelstam s and branching point s0.
-double conformal(double s, double s0)
-{
-        double numerator = sqrt(s) - sqrt(s0 - s);
-        double denominator = sqrt(s) + sqrt(s0 - s);
-        return numerator/denominator;
-}
 
-// Elastic momentum above threshold sth, as a function of s.
-double elastic_mom( double s, double sth)
-{
-        return sqrt(s - sth) / 2.;
-}
 
 complex<double> GKPRY_partial_wave(int l, int iso, double s)
 {

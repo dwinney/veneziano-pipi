@@ -37,18 +37,19 @@ const cd xi(0., 1.);
 
 #define backN   10.*xr  //Background N, just needs to be "large enough"
 #define maxN    3       //Truncated maximum n
+#define DPOINTS  100     // Number of points to have in plotting functions
 #define INTP    100     //Number of points for numerical integration
 
-//amp.cpp
 cd rtraj(double alph[], double s);
 cd ctraj(double alph[], double s);
 cd n_amp(int n, double alph[], double coupling[], double s, double t);
 
-//pipi-amp.cpp
+
 double phase_shift(int l, int iso, double s);
 double inelasticity(int l, int iso, double s);
 double conformal(double s, double s0);
 double elastic_mom( double s, double sth);
+
 complex<double> GKPRY_partial_wave(int l, int iso, double s);
 complex<double> GKPRY_iso_amp(int iso, double s, double z);
 complex<double> GKPRY_amplitude(double s, double z);
@@ -74,6 +75,10 @@ void plotGKPY(int CASE, int plot, string OPTION, string OUTPUT);
 void getCOUPLING(string INPUT, double ** output);
 void plotVENEZ(int MODE, int plot, string OPTION, string INPUT, string OUTPUT);
 void plotFILE(string INPUT, string OUTPUT);
+
+//fitting.cpp
+int getDATA(string INPUT);
+void fitVENEZ(int MODE, string OPTION, string INPUT, string OUTPUT);
 
 extern double s_dat[], re_dat[], im_dat[];
 extern int ISOCHOICE;

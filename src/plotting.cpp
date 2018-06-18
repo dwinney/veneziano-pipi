@@ -23,13 +23,13 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
         setprecision(17);
         double s[10000], delta[10000], eta[10000], sigma[10000], amp_re[10000], amp_im[10000];
         double smax, step;
-        int nstep;
+
         complex<double> amp;
 
         smax = pow(1.42, 2.);
-        step = .001;
 
-        nstep = (int) ((smax - sthPi) / step);
+
+        step = ((smax - sthPi) / (double) DPOINTS );
 
         int wave = -1;
         switch (MODE) {
@@ -56,7 +56,7 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
         string DAT = OUTPUT + ".dat";
         ofstream gkpry;
         gkpry.open(DAT.c_str());
-        for (int i = 0; i < nstep; i++)
+        for (int i = 0; i < DPOINTS; i++)
         {
                 s[i] = sthPi + 1e-5 + step * double(i); //offset threshold
                 gkpry << left << setw(30) << sqrt(s[i]);
@@ -112,12 +112,12 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
                         TMultiGraph *mg = new TMultiGraph();
                         mg->SetTitle("");
 
-                        TGraph * real = new TGraph(nstep, s, amp_re);
+                        TGraph * real = new TGraph(DPOINTS, s, amp_re);
                         real->SetLineColor(2);
                         real->SetName("real");
                         real->SetLineWidth(4);
 
-                        TGraph * imag = new TGraph(nstep, s, amp_im);
+                        TGraph * imag = new TGraph(DPOINTS, s, amp_im);
                         imag->SetLineColor(4);
                         imag->SetName("imag");
                         imag->SetLineWidth(4);
@@ -143,7 +143,7 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
                         string PDF1 = "./output/GKPY-inelasticity-" + OPTION + "-PLOT.pdf";
                         TCanvas * c1 = new TCanvas("c1",":)",200,10,700,500);
 
-                        TGraph *g1 = new TGraph(nstep, s, eta);
+                        TGraph *g1 = new TGraph(DPOINTS, s, eta);
                         g1->SetLineColor(2);
                         string title = "Inelasticity (" + OPTION + "-wave)";
                         g1->SetTitle(title.c_str());
@@ -158,7 +158,7 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
 
                         c1->Clear("g1");
                         string PDF2 = "./output/GKPY-phaseshift-" + OPTION + "-PLOT.pdf";
-                        TGraph *g2 = new TGraph(nstep, s, delta);
+                        TGraph *g2 = new TGraph(DPOINTS, s, delta);
                         g2->SetLineColor(2);
                         title = "Phase Shift (" + OPTION + "-wave)";
                         g2->SetTitle(title.c_str());
@@ -176,19 +176,58 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
         }
 }
 
+// Imports couplings from a given string filename
+void getCOUPLING(string INPUT, double ** output)
+{
+        double n[30], i[30];
+        double aNI[30];
+        ifstream coupling;
+        coupling.open(INPUT.c_str());
+        if (coupling.fail())
+        {
+                cout << "Could not open " << INPUT << ". Quitting..." << endl;
+                cout << endl;
+                exit(1);
+        }
+        else
+        {
+                int j = 0;
+                int ii, nn;
+                while(!coupling.eof())
+                {
+                        coupling >> n[j];
+                        coupling >> i[j];
+                        coupling >> aNI[j];
+
+                        if (j > 0 && i[j] < maxN)
+                        {
+                                nn = (int) n[j]; ii = (int) i[j];         //switch from doubles to int for n and i
+                                output[nn][ii] = aNI[j];
+                        }
+                        j++;
+                }
+                output[0][0] = n[0]; output[0][1] = i[0]; output [0][2] = aNI[0];
+                // cout << output[0][0] << endl;
+                cout << " Importing couplings and Regge Trajectory parameters from: " << endl;
+                cout << " " << INPUT << endl;
+                cout << endl;
+        }
+        coupling.close();
+
+}
+
 //VENEZIANO model
 void plotVENEZ(int MODE, int plot, string OPTION, string INPUT, string OUTPUT)
 {
         setprecision(17);
         double s[10000], amp_re[10000], amp_im[10000];
         double smax, step;
-        int nstep;
         complex<double> amp;
 
         smax = pow(1.42, 2.);
         step = .001;
 
-        nstep = (int) ((smax - sthPi) / step);
+        step = ((smax - sthPi) / double(DPOINTS));
 
         double **a_matrix;
         a_matrix = new double *[maxN+1];
@@ -219,7 +258,7 @@ void plotVENEZ(int MODE, int plot, string OPTION, string INPUT, string OUTPUT)
         ofstream venez;
         string DAT = OUTPUT + ".dat";
         venez.open(DAT.c_str());
-        for (int i = 0; i < nstep; i++)
+        for (int i = 0; i < DPOINTS; i++)
         {
                 s[i] = sthPi + 1e-5 + step * double(i); //offset threshold
                 venez << left << setw(30) << sqrt(s[i]);
@@ -264,12 +303,12 @@ void plotVENEZ(int MODE, int plot, string OPTION, string INPUT, string OUTPUT)
                 TMultiGraph *mg = new TMultiGraph();
                 mg->SetTitle("");
 
-                TGraph * real = new TGraph(nstep, s, amp_re);
+                TGraph * real = new TGraph(DPOINTS, s, amp_re);
                 real->SetLineColor(2);
                 real->SetName("real");
                 real->SetLineWidth(4);
 
-                TGraph * imag = new TGraph(nstep, s, amp_im);
+                TGraph * imag = new TGraph(DPOINTS, s, amp_im);
                 imag->SetLineColor(4);
                 imag->SetName("imag");
                 imag->SetLineWidth(4);
@@ -356,58 +395,4 @@ void plotFILE(string INPUT, string OUTPUT)
 
         cout << " Output to " << OUTPUT << endl;
         cout << endl;
-}
-
-//Converts string of spectroscopic name of partial wave to an INT
-int WaveTranslate(string OPTION)
-{
-        int wave;
-        if (OPTION == "S0") {wave = 0;}
-        else if (OPTION == "S2") {wave = 02;}
-        else if (OPTION == "P1") {wave = 11;}
-        else if (OPTION == "D0") {wave = 20;}
-        else if (OPTION == "D2") {wave = 22;}
-        else if (OPTION == "F1") {wave = 31;}
-        else {cout << "Invalid Partial Wave " << OPTION << ". Quitting..." << endl; cout << endl; exit(1);}
-        return wave;
-}
-
-// Imports couplings from a given string filename
-void getCOUPLING(string INPUT, double ** output)
-{
-        double n[30], i[30];
-        double aNI[30];
-        ifstream coupling;
-        coupling.open(INPUT.c_str());
-        if (coupling.fail())
-        {
-                cout << "Could not open " << INPUT << ". Quitting..." << endl;
-                cout << endl;
-                exit(1);
-        }
-        else
-        {
-                int j = 0;
-                int ii, nn;
-                while(!coupling.eof())
-                {
-                        coupling >> n[j];
-                        coupling >> i[j];
-                        coupling >> aNI[j];
-
-                        if (j > 0 && i[j] < maxN)
-                        {
-                                nn = (int) n[j]; ii = (int) i[j];         //switch from doubles to int for n and i
-                                output[nn][ii] = aNI[j];
-                        }
-                        j++;
-                }
-                output[0][0] = n[0]; output[0][1] = i[0]; output [0][2] = aNI[0];
-                // cout << output[0][0] << endl;
-                cout << " Importing couplings and Regge Trajectory parameters from: " << endl;
-                cout << " " << INPUT << endl;
-                cout << endl;
-        }
-        coupling.close();
-
 }

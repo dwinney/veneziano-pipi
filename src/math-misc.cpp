@@ -1,3 +1,65 @@
+#include "pipi.h"
+
+//Converts string of spectroscopic name of partial wave to an INT
+int WaveTranslate(string OPTION)
+{
+        int wave;
+        if (OPTION == "S0") {wave = 0;}
+        else if (OPTION == "S2") {wave = 02;}
+        else if (OPTION == "P1") {wave = 11;}
+        else if (OPTION == "D0") {wave = 20;}
+        else if (OPTION == "D2") {wave = 22;}
+        else if (OPTION == "F1") {wave = 31;}
+        else {cout << "Invalid Partial Wave " << OPTION << ". Quitting..." << endl; cout << endl; exit(1);}
+        return wave;
+}
+
+// Mandelstam variables t and u as functions of s and s-channel scattering angle z
+double t_man(double s, double z)
+{
+        double psqr = (s - 4.*pow(mPi,2.))/4.;
+        double result = -2.*psqr* (1. - z);
+        return result;
+}
+
+double u_man(double s, double z)
+{
+        double psqr = (s - 4.*pow(mPi,2.))/4.;
+        double result = -2.*psqr* (1. + z);
+        return result;
+}
+
+// Kallen triangle function
+double kallen(double s, double t, double u)
+{
+        double result = pow(s,2.) + pow(t, 2.) + pow(u, 2.) + 2.*s*t + 2.*t*s + 2.*t*u;
+        return result;
+}
+
+// Elastic momentum above threshold sth, as a function of s.
+double elastic_mom( double s, double sth)
+{
+        return sqrt(s - sth) / 2.;
+}
+
+// Legendre Polynomials P_l(x) (up to l = 5)
+double legendre(int l, double x)
+{
+        double PL;
+        switch (l)
+        {
+        case 0: PL = 1.; break;
+        case 1: PL = x; break;
+        case 2: PL = .5 * (3.*pow(x, 2.) - 1.); break;
+        case 3: PL = .5 * (5.*pow(x,3.) - 3.*x); break;
+        case 4: PL = (35.*pow(x,4.) - 30.*pow(x,2.) + 3.)/8.; break;
+        case 5: PL = (63.*pow(x,5.) - 70.*pow(x,3.) + 15.*x)/8.; break;
+        default: cout << "Legendre Polynomials don't go that high!!!" << endl;
+                exit(1);
+        }
+        return PL;
+}
+
 //  cgamma.cpp -- Complex gamma function.
 //      Algorithms and coefficient values from "Computation of Special
 //      Functions", Zhang and Jin, John Wiley and Sons, 1996.
@@ -9,10 +71,6 @@
 //  Returns (1e308,0) if the real part of the argument is a negative integer
 //  or 0 or exceeds 171.
 //
-#include <complex.h>
-#include <complex>
-
-using namespace std;
 
 complex<double> cgamma(complex<double> z)
 {
@@ -97,8 +155,6 @@ complex<double> cgamma(complex<double> z)
    B.P. Flannery
 *******************************************************************************/
 
-#include <stdlib.h>
-#include <math.h>
 
 #define NR_END 1
 #define EPS 3.0e-11 /* EPS is the relative precision. */
