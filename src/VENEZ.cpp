@@ -11,13 +11,12 @@
 
 double mres;
 
-
 //Real Linear Regge Trajectory
 // a0 - intercept (~ .5 for rho)
-// ap - slope parameter (~ .09 for rho)
+// ap - slope parameter (~ .9 for rho)
 complex<double> rtraj(double alph[], double s)
 {
-        complex<double> result = alph[0] + alph[1]*(s - mres*mres);
+        complex<double> result = alph[0] + alph[1] * s;
         return result;
 }
 
@@ -25,8 +24,9 @@ complex<double> rtraj(double alph[], double s)
 //Complex Regge Trajectory (w/ Phase Space factor)
 complex<double> ctraj(double alph[], double s)
 {
-        complex<double> phase_space = sqrt(complex<double>(s - sthPi));
-        complex<double> imagpart = xi * alph[2] * mres * alph[1];
+        complex<double> phase_space = sqrt( (complex<double>)(s - sthPi));
+        complex<double> imagpart = xi * 1.* alph[2] * mres * alph[1];
+        // cout << phase_space << endl;
         complex<double> result = alph[0] + alph[1] *(s - mres*mres)  + imagpart * phase_space;
         // cout << result << endl;
         return result;
@@ -111,26 +111,30 @@ complex<double> VENEZ_iso_amp(int iso, double ** coup, double alph[], double s, 
 //TODO: remove dependency on function???? (i.e. isospin_amp)
 // Outputs the complex partial-wave amplitude for pi-pi scattering at fixed s.
 // l - partial wave
-// iso - isospin projection ( iso = 1, 2, 3)
+// iso - isospin projection ( iso = 0, 1, 2)
 // coup - a_n,i matrix of couplings
 // alph - regge trajectory parameters
 complex<double> VENEZ_partial_wave(int l, int iso, double ** coup, double alph[], double s)
 {
-        double Pl, z;
+        double Pl, z, re, im;
         double weights[INTP], abscissas[INTP];
-        complex<double> sum;
+        complex<double> venez;
 
         //prepares arrays of weights and abscissas, using Legendre functions
         gauleg(-1., 1., abscissas, weights, INTP);
 
         //integrates by Gaussian quadrature
+        re = 0.; im = 0.;
         for (int i = 0; i < INTP; i++)
         {
                 z = abscissas[i];
                 Pl = legendre(l, z);
-                sum += weights[i] * Pl * VENEZ_iso_amp(iso, coup, alph, s, z);
+                venez = VENEZ_iso_amp(iso, coup, alph, s, z);
+                re += weights[i] * Pl * real(venez);
+                im += weights[i] * Pl * imag(venez);
         }
-        return .5*sum;
+        complex<double> amp(re, im);
+        return .5*amp;
 }
 
 complex<double> VENEZ_amplitude(double ** coup, double alph[], double s, double z)

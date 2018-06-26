@@ -35,10 +35,10 @@ const double sthEta = 4.*mEta*mEta;
 const cd xr(1., 0.);
 const cd xi(0., 1.);
 
-#define backN   10.*xr  //Background N, just needs to be "large enough"
-#define maxN    3       //Truncated maximum n
-#define DPOINTS  100     // Number of points to have in plotting functions
-#define INTP    100     //Number of points for numerical integration
+#define backN       6.*xr   //Background N, just needs to be "large enough"
+#define maxN        3       //Truncated maximum n
+#define DPOINTS     100    // Number of points to have in plotting functions
+#define INTP        100     //Number of points for numerical integration
 
 cd rtraj(double alph[], double s);
 cd ctraj(double alph[], double s);

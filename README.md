@@ -1,4 +1,4 @@
-# Pi-Pi Scattering
+# ππ Scattering
 
 Toolkit for plotting and fitting pion-pion scattering amplitudes.
 

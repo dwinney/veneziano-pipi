@@ -85,7 +85,7 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
                         gkpry << setw(30) << delta[i] << setw(30) << eta[i] << endl;
                         break;
                 }
-                case 4: //phaseshifts and inelasticities
+                case 4: //partial waves
                 {
                         int iso = wave % 10;
                         int l = wave / 10;
@@ -124,7 +124,7 @@ void plotGKPY(int MODE, int plot, string OPTION, string OUTPUT)
 
                         mg->Add(real);
                         mg->Add(imag);
-                        mg->Draw("AC");
+                        mg->Draw("AC  ");
 
                         TLegend* l = new TLegend(.1,0.77,0.27,0.9);
                         l->AddEntry("real","Real","l");
@@ -199,7 +199,7 @@ void getCOUPLING(string INPUT, double ** output)
                         coupling >> i[j];
                         coupling >> aNI[j];
 
-                        if (j > 0 && i[j] < maxN)
+                        if (j > 0 && i[j] < maxN +  1 )
                         {
                                 nn = (int) n[j]; ii = (int) i[j];         //switch from doubles to int for n and i
                                 output[nn][ii] = aNI[j];
