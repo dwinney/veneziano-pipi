@@ -2,3 +2,8 @@
 /output
 pipi
 *.dat
+/tex/*.aux
+/tex/*.out
+/tex/*.log
+/tex/*.synctex.gz
+/tex/phen-venz-pipiNotes.bib
