@@ -1,0 +1,265 @@
+\documentclass[aps,prd,amsmath,amssymb,superscriptaddress,onecolumn,
+nofootinbib,showpacs,preprintnumbers]{revtex4-1}
+
+\usepackage{hyperref,color,subfigure,soul}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{physics}
+\usepackage{cleveref}
+\usepackage{tikz}
+\usepackage{mathtools}
+
+\newcommand{\pp}{\pi\pi }
+\newcommand{\ma}{\mathcal{A}}
+\newcommand{\maI}[1]{\mathcal{A}^{(#1)}}
+\newcommand{\mvI}[1]{\mathcal{V}^{(#1)}}
+
+\newcommand{\az}{\alpha_0}
+\newcommand{\apr}{\alpha^\prime}
+\newcommand{\as}{\alpha_s}
+\newcommand{\at}{\alpha_t}
+
+\begin{document}
+
+\section{General $\pp$ Scattering Amplitude}
+We are interested in the structure of the the isospin invariant $\pp$ scattering amplitude:
+%
+	\begin{equation}
+	\frac{1}{32\pi}\mel{\pi_k(p_3)\pi_l(p_4)}{T}{\pi_i(p_1)\pi_j(p_2)} \equiv i (2 \pi)^4 \delta^4(p_1 + p_2 - p_3 - p_4) \;  \mathcal{M}_{ijkl}(s,t,u) 
+	\end{equation}
+%
+where the Cartesian indices denote isospin indices and $s + t + u = 16 \; m_\pi^2$ are the standard Mandelstam variables.
+We can factor out the isospin dependence and define three scalar amplitudes representing the scattering amplitdes in the s-, t-, and u-channels respectively:
+%
+	\begin{equation} \label{scalaramps}
+	\mathcal{M}_{ijkl}(s,t,u) = \delta_{ij}\delta_{kl} \; A(s,t,u) + \delta_{ik}\delta_{jl} \; B(s,t,u) + \delta_{il}\delta_{jk} \; C(s,t,u).
+	\end{equation}
+%
+The three scalar amplitudes in \cref{scalaramps} are not independent thanks to symmetries of the initial and final state pions. Bose symmetry lets us freely interchange pions in the final state, i.e. amplitudes are invariant from exchange $t \leftrightarrow u$. Additionally, crossing symmetry relates cross-channel amplitudes must by the interchange of a initial and final state pion, ($i\leftrightarrow k$ or $i \leftrightarrow j$ or similarly $s \leftrightarrow t$ and $s \leftrightarrow u$). This gives us relations:
+%
+	\begin{equation} \label{symmetries}
+	 B(s,t,u) = A(t,s,u) \quad \textrm{and} \quad C(s,t,u) = A(u,t,s). 
+	\end{equation}
+%
+
+Thus we can write \cref{scalaramps} in terms of a single amplitude:
+%
+	\begin{equation}\label{matrixelement}
+	\mathcal{M}_{ijkl}(s,t,u) =  \delta_{ij}\delta_{kl} \; A(s, t,u) + \delta_{ik}\delta_{jl} \; A(t, s, u) + \delta_{il}\delta_{jk} \; A(u, t,s).
+	\end{equation}
+	\subsection{Isospin Amplitudes}
+
+Similar to \cite{JPACCollaboration2018} we want to look at amplitudes which have a well-defined isopin in the $s$-channel which we can project out. We define two-pion isospin states by:
+%
+	\begin{equation} \label{isospin}
+	\ket{\pi^i \pi^j}_I = P^{I}_{ijkl} \ket{\pi^k \pi^l}
+	\end{equation}
+%
+where 
+%
+	\begin{equation} \label{projectors}
+	P^{(0)}_{ijkl} = \frac{1}{3}\delta_{ij}\delta_{kl},  \quad P^{(1)}_{ijkl} = \frac{1}{2}(\delta_{ik}\delta_{jl}-\delta_{il}\delta_{jk}),  \quad \textrm{and} \quad   P^{(2)}_{ijkl} = \frac{1}{2}
+	(\delta_{ik}\delta_{jl} + \delta_{il}\delta_{jk}) - \frac{1}{3} \delta_{ij}\delta_{kl}.
+	\end{equation}
+%
+
+Combining \cref{matrixelement} and \cref{projectors} we get:
+%
+	\begin{equation}\label{iso-decomp}
+	\mathcal{M}_{ijkl}(s,t,u) = P^{(0)}_{ijkl} \; A^{(0)}(s,t,u) + P^{(1)}_{ijkl}  \; A^{(1)}(s,t,u) +  P^{(2)}_{ijkl} \; A^{(2)}(s,t,u).
+	\end{equation}
+%
+Also comparing \cref{matrixelement,iso-decomp} we can write our isospin amplitudes in terms of the original scalar amplitude: 
+%
+	\begin{align} \label{matrix}
+		\begin{bmatrix} 
+		A^{(0)}(s,t,u) \\ A^{(1)} (s,t,u) \\ A^{(2)}(s,t,u)
+		\end{bmatrix} 
+	=
+		\begin{bmatrix*}[r]
+			3 & 1 & 1 \\ 	0 & 1 & -1 \\ 0 & 1 & 1 
+		\end{bmatrix*}
+		\begin{bmatrix}
+		A(s,t,u) \\ A(t,s,u) \\ A(u,t,s) 
+		\end{bmatrix}
+	\end{align}
+%
+By projecting out specific partial-waves of the isospine definite amplitudes \cref{matrix} we can study the resonance content of the scattering amplitude.
+
+%%%%%%%%%%%%%%%%%%%%%%%%% VENEZIANO AMPLITUDE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Veneziano Model}
+
+Historically a dual resonance formalism for $\pp$ scattering takes the form of decomposing the scalar amplitude $A(s,t,u)$ into symmetric meromorphic functions of two variables and imposing Bose and crossing symmetries. Specifically this means:
+	\begin{equation}
+		A(s,t,u) = [ \ma(t,u) - \ma(s,u) - \ma(s,t) ]
+		\label{dual_decomp}
+	\end{equation}
+for $\ma(s,t) = \ma(t,s)$ being chosen to have the correct analytic (i.e. dynamical resonance) structure in the energy variables.
+The original Veneziano amplitude selected:
+	\begin{equation}
+		\ma(s,t) = \frac{\Gamma( 1 - \alpha(s) ) \Gamma(1- \alpha(t))}{\Gamma(1- \alpha(s) - \alpha(t))}
+		\label{eq:orig_venez}
+	\end{equation}
+which has infinitely many simple pole singularities when $\alpha(s)$ (or $\alpha(t)$) are integers and the correct Regge behavior ( $\ma(s,t) \sim s^{\alpha(t)}$) at high energies. Analogous decompositions for the cross channel amplitudes are defined by simple interchange of Mandelstam variables in \cref{dual_decomp}
+	\begin{equation}
+		\text{t-channel:} \quad A(t,s,u) \qquad \text{u-channel:} \quad A(u,t,s)
+	\end{equation}.
+Then isospin definite scattering amplitudes can be assembled by combinations of \cref{eq:orig_venez}, using \cref{dual_decomp} in \cref{matrix}.
+\begin{align} \label{isoamps}
+		\begin{bmatrix}
+		A^{(0)}(s,t,u) \\ 
+		A^{(1)}(s,t,u) \\ 
+		A^{(2)}(s,t,u) 
+		\end{bmatrix}
+	= 
+		\begin{bmatrix*}[r]
+			-3 & -3 & 1 \\ 
+			 -2 & \;2 & \;0 \\ 
+				\; 0 & \; 0 & -2 
+		\end{bmatrix*}
+		\begin{bmatrix} 
+		\ma(s,t) \\ 
+		\ma(s,u) \\ 
+		\ma(t,u)
+		\end{bmatrix} 
+	\end{align}
+	
+	 This approach, however, requires the assumption of exact exchange degeneracy between trajectories, so that the couplings and masses of isospin-0 trajectories depend on the parameterization of the isospin-1 trajectory. It also provides very little freedom in the changing the features predicted by the model.
+
+\subsection{Phenomenological Approach}
+We wish to construct a model that takes advantage of the appealing features of the Veneziano amplitude, most notably the Regge behavior at high energies, but with more flexibility in describing resonance structures in scattering data. 
+To incorporate multiple trajectories (i.e. $\sigma, \rho, f_2, ...$) we take a bottom-up approach, noticing that the direct-channel resonance content of the isospin amplitudes should come from the Bose-symmetric combinations:
+	\begin{equation}
+		[ \ma^{(I)}(s,t) + (-1)^I \ma^{(I)}(s,u) ] 
+		\label{direct}
+	\end{equation}
+where we now allow our (at this point completely general) symmetric functions to be different for each isospin channel. This freedom will allow us to parameterize each channel independently (a trajectory $\alpha^{(I)}$(s) for each isospin channel) and more accurately describe resonance masses and widths. 
+
+In order to also satisfy crossing symmetry, we must add background terms containing poles in $t$ and $u$ in other isospin channels. To this end, we consider the most general sum of background terms that are Bose-symmetric:
+	\begin{align}
+		\text{Even Isospin (symmetric): }& \qquad \sum_{I^\prime} C_{II^\prime} \; \ma^{(I^\prime)}(t,u) \nonumber \\
+		\text{Odd Isospin (antisymmetric): }& \qquad \sum_{I^\prime} C_{II^\prime} \; [ \ma^{(I^\prime)}(s,t) - \ma^{(I^\prime)}(s,u) ].
+		\label{background}
+		\end{align}
+We immediately see that the isospin-1 poses as problem as the only way to construct a background term that is antisymmetric under $t \leftrightarrow u$ with symmetric scalar functions introduces $s$ dependence and therefore the possibility of unwanted direct-channel resonance contributions from the background terms. Our choice for the function form of $\maI{I}$ must have a way to eliminate these unwanted poles.
+
+Imposing crossing symmettry on $A^{(I)}(s,t,u)$ as a sum of \cref{direct,background} we can derive the most general form of a dual-resonance model  for $\pp$ scattering using different isospin-definite scalar functions:
+    \begin{align} \label{isospin!}
+          A^{(I)}(s,t,u) &= (-1)^I \big[ \maI{1}(s,t) + \maI{I}(s,t) \big ] + \big [ \maI{1}(s,u) +  (-1)^I \; \maI{I}(s,u) \big ] + \big[ \maI{1}(t,u) - \maI{I}(t,u)\big] \nonumber \\
+          &+ \frac{1}{2}  \big[1-(-1)^I\big]  \sum_{I^\prime}  \; C_{II^\prime} \bigg [ \maI{I^\prime}(s,t) + (-1)^{I+I^\prime} \maI{I^\prime}(s,u)\bigg]   \\
+          &+ \frac{1}{2} \big[1 + (-1)^I] \sum_{I^\prime} C_{II^\prime}\;\maI{I^\prime}(t,u) \nonumber.
+    \end{align}
+Here the coefficients $C_{II^\prime}$ are the elements of the isospin crossing matrix 
+	\begin{align}
+	C= 
+	\setlength\arraycolsep{6pt}
+	 	\begin{bmatrix*}[r]
+	 	\dfrac{2}{3} & 2 & \dfrac{10}{3} \\[1.2em]
+	 	\dfrac{2}{3} & 1 & -\dfrac{5}{3} \\[1.2em]
+	 	\dfrac{2}{3} & -1 & \dfrac{1}{3} 
+	 	\end{bmatrix*},
+	\end{align}
+and allow the isospin-projections of the $t$ and $u$ channels to be related to \cref{isospin!} by permutations of Mandelstam variables.
+ The extra factors of $\maI{1}$ are required to maintain crossing symmetry and come from the necessary $s$-dependence of anti-symmetric background terms. 
+ 
+ For our choice of scalar function we use an infinite sum of Euler function-like terms:
+ 	\begin{equation}
+ 		\maI{I}(s,t) = \sum_{n=1}^{n_{\text{max}}} \sum_{m=n}^{\infty} \sum_{k=0}^{m} \; c^{(I)}_{m,k} \frac{\Gamma( m- \alpha^{(I)}(s) ) \Gamma( m - 	\alpha^{(I)}(t))}{\Gamma(m + k - \alpha^{(I)}(s) - \alpha^{(I)}(t))}
+ 	\end{equation}
+With appropriate choices of $c^{(I)}_{m,k}$ (c.f. charmonium paper) we can define:
+	\begin{equation} \label{single-pole}
+    	\mathcal{V}^{(I)}_n(s,t) = \bigg [\frac{2n - \as^{(I)} - \at^{(I)}}{(n- \as^{(I)})(n-\at^{(I)})} \bigg] \sum_{i=0}^n a^{(I)}_{n,i} \; (\as^{(I)} + \at^{(I)} )^{i} \; \bigg [ \frac{\Gamma(N + 1 - \as^{(I)}) \; \Gamma (N + 1 - \at^{(I)})}{\Gamma ( N + 1 - n) \; \Gamma (N+ n + 1 - \as^{(I)} - \at^{(I)})} \bigg ] 
+	\end{equation}
+where $\as^{(I)} \equiv \az^{(I)} + {\apr}^{(I)} \; s$ is the linear Regge trajectory of isospin-$I$.
+We see that \cref{single-pole} retains the usual behavior of the Veneziano amplitude \cref{eq:orig_venez} at when $\as \geq N$, and thus at high energies the Regge behavior is preserved. The low enegy behavior (in the resonance region), is a simple summation of simple poles in $s$ and $t$ channels when $\as$ or $\at = n$ respectively. The pole at $\as = n$ has a polynomial residue of $\mathcal{O}(n)$ in both $s$ and $t$ and will thus have partial waves of spin $0 \leq \ell \leq n$. The coefficients $a_{n,i}^{(I)}$ allow us to control the strengths of the couplings to individual resonant intermediate states and/or decouple unwanted resonances (discussed below).
+
+Thus the full model becomes \cref{isospin!} with
+	\begin{equation}
+	\maI{I}(s,t) = \sum_{n=1}^{n_{\text{max}}} \mvI{I}_n(s,t).
+	\end{equation}
+The inputs then become parameterizations for Regge trajectories of each channel to reproduce physical resonance masses, the ``resonant region cutoff'', $N$, above which Regge behavior dominates. Fitting to data scattering data, we can extract couplings (and therefore partial widths) to individual resonant intermediate states. 
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Resonances}
+From \cref{direct} we see that $A^{(I)}(s,t,u)$ will have direct-channel poles of isospin-$I$ at every $\as = n$. It will have ``wrong parity'' contributions from the background as discussed above.
+Looking first at the physical poles with the correct Bose symmetry (surpressing isospin indices for ease of notation):
+	\begin{align} \label{pole}
+	A^{(I)}(m_n^2,t,u) \sim& \frac{1}{s -  m_n^2} \sum_{i=0}^n a^{(I)}_{n,i} \; \bigg [ \big(\alpha(m_n^2) + \alpha(t) \big)^i + (-1)^{I} \big(\alpha(m_n^2) + \alpha(u) \big)^i \bigg]
+	\end{align}
+where 
+	\begin{equation}
+	m_n^2 \equiv {m_n^{(I)}}^2 = \frac{n - \az^{(I)}}{{\apr}^{(I)}}
+	\end{equation}	
+is the mass of the resonance of isospin-$I$ at $\as = n$.
+Looking at the residue of \cref{pole}, we can redefine the coefficients $a_{n,i}^{(I)}$ such that
+	\begin{equation} \label{residue}
+	\text{Res }[ A^{(I)}(m_n^2,t,u)] = \sum_{\ell=0}^n \gamma_{n,\ell}^{(I)} \; [1 + (-1)^{\ell+I}] \; P_\ell(z_s)
+	\end{equation}
+where we've used:
+	\begin{equation}
+	t(s,z_s) = -2k^2(s)(1-z_s) \quad \text{ and } \quad u(s, z_s) = -2k^2(s)(1+z_s)
+	\end{equation}
+	with $z_s$, the $s$-channel scattering angle, $k(s) = \sqrt{s - 4m^2_p}/2$ and Legendre polynomials $P_\ell$. We see Bose symmetry ($I+\ell$ is even) is explicitly enforced in \cref{residue}. We additionally have $n$ coefficients $\gamma_{n.\ell}^{(I)}$ related to the partial decay widths of each partial wave by
+	\begin{equation}
+	\Gamma^{(I)}_\ell = \frac{ - k(m^2_n)}{2m^2_n} \int^1_{-1} dz_s P_\ell \; \text{Res }A^{(I)}(m^2_n, z_s) = (2\ell +1) \frac{ - k(m^2_n)}{2m^2_n} \gamma^{(I)}_{n,\ell}.
+	\end{equation}
+Here we can address the problem of unwanted poles of wrong parity. These partial widths are completely undetermined, instead require being fit to data. However, by making the distinction of different Regge trajectories, couplings to resonances not the natural Bose symmetry of that trajectory (i.e. $I+\ell$ is even) are unphysical. For example the $\rho$ trajectory containing isospin-1 resonances ($\rho(770), \rho(1450), \rho_3(1690)$, etc) should not contain spin-even resonances.  We can set these couplings identically to zero, leaving $\lceil n/2 \rceil$ free couplings for the physical poles: 	
+		\begin{equation}
+		\gamma_{n,\ell}^{(I)} \equiv 0 \qquad \text{for odd} \; \ell+I.
+		\end{equation}
+
+We note that the unwanted background poles are exactly of this form and by setting these unphysical couplings to zero eliminates them. For example, taking $I = 0$ in \cref{isospin!}, 
+    \begin{align} \label{Azero}
+    A^{(0)}(s,t,u) &= \maI{0}(s,t) + \maI{0}(s,u) - \frac{1}{3} \, \maI{0}(t,u) \nonumber \\[0.5em]
+                        &\; + \maI{1}(s,t) + \maI{1}(s,u) + 3 \, \maI{1}(t,u)  \\[0.5em] 
+                        &\; + \frac{10}{3} \, \maI{2}(t,u) \nonumber,
+    \end{align}
+the contributing poles come from terms of the form 
+	\begin{equation}
+			[ \ma^{(I^\prime)}(s,t) + (-1)^I \ma^{(I^\prime)}(s,u) ] \sim \sum_{\ell=0}^n \gamma_{n,\ell}^{(I^\prime)} \; [1 + (-1)^{\ell+I}] \; P_\ell(z_s)
+	\end{equation}
+where for even (odd) $I$, the background $I^\prime$ is odd (even). Thus, Bose symmetry for $I=0$ will have contributions from even resonances on the isospin-1 trajectory which are identically zero. Similarly we can in general always decouple odd partial waves on the isospin-0 and 2 trajectories to prevent unphysical contributions to the isospin-1 amplitude.
+
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+\end{document}
